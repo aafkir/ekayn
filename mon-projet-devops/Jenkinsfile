@@ -1,0 +1,34 @@
+pipeline {
+  agent any
+
+  environment {
+    APP_NAME = 'MainframeApp'
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        echo "Récupération du code source"
+      }
+    }
+
+    stage('Build COBOL') {
+      steps {
+        echo "Compilation de ${APP_NAME}"
+        // ici on appelle un script groovy externe
+      }
+    }
+
+    stage('Test') {
+      steps {
+        echo "Tests COBOL"
+      }
+    }
+
+    stage('Deploy') {
+      steps {
+        echo "Déploiement sur z/OS en cours"
+      }
+    }
+  }
+}
