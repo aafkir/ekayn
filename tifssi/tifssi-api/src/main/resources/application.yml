@@ -1,0 +1,52 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: tifssi-api
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/tifssi}
+    username: ${DB_USERNAME:tifssi}
+    password: ${DB_PASSWORD:tifssi}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    create-schemas: true
+    default-schema: shared
+    schemas:
+      - shared
+      - crm
+      - staffing
+      - projects
+      - timesheets
+      - expenses
+      - absences
+      - billing
+    locations: classpath:db/migration
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui
+  show-actuator: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+app:
+  demo-data:
+    enabled: ${APP_DEMO_DATA_ENABLED:false}

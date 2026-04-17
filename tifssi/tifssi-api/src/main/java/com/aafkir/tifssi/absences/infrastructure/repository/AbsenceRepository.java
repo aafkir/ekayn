@@ -1,0 +1,10 @@
+package com.aafkir.tifssi.absences.infrastructure.repository;
+
+import com.aafkir.tifssi.absences.domain.model.Absence;
+import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface AbsenceRepository extends JpaRepository<Absence, Long> {
+
+    List<Absence> findAllByProfileIdOrderByStartDateAscIdAsc(Long profileId);
+}
