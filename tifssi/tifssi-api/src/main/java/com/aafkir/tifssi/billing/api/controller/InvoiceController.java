@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/invoices")
-@Tag(name = "Billing", description = "Gestion detaillee des factures et de leurs lignes.")
+@Tag(name = "Billing")
 public class InvoiceController {
 
     private final InvoiceService invoiceService;

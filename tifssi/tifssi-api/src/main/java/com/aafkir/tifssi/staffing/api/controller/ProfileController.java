@@ -4,7 +4,9 @@ import com.aafkir.tifssi.shared.api.error.ApiErrorResponse;
 import com.aafkir.tifssi.staffing.api.dto.request.ProfileCreateRequest;
 import com.aafkir.tifssi.staffing.api.dto.request.ProfilePatchRequest;
 import com.aafkir.tifssi.staffing.api.dto.response.ProfileResponse;
+import com.aafkir.tifssi.staffing.api.dto.response.ProfileSkillResponse;
 import com.aafkir.tifssi.staffing.application.service.ProfileService;
+import com.aafkir.tifssi.staffing.application.service.ProfileSkillService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -28,13 +30,15 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/profiles")
-@Tag(name = "Staffing", description = "Gestion des profils staffing.")
+@Tag(name = "Profiles")
 public class ProfileController {
 
     private final ProfileService profileService;
+    private final ProfileSkillService profileSkillService;
 
-    public ProfileController(ProfileService profileService) {
+    public ProfileController(ProfileService profileService, ProfileSkillService profileSkillService) {
         this.profileService = profileService;
+        this.profileSkillService = profileSkillService;
     }
 
     @GetMapping
@@ -72,12 +76,39 @@ public class ProfileController {
         return profileService.findById(id);
     }
 
+    @GetMapping("/{profileId}/skills")
+    @Operation(
+            summary = "Lister les competences d'un profil",
+            description = "Retourne les competences associees a un profil, avec leur niveau, experience et indicateur de competence principale."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Competences du profil retournees avec succes.",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = ProfileSkillResponse.class)))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Profil introuvable.",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
+    public List<ProfileSkillResponse> findSkillsByProfileId(@PathVariable Long profileId) {
+        return profileSkillService.findAllByProfileId(profileId);
+    }
+
     @PostMapping
     @Operation(
             summary = "Creer un profil",
-            description = "Cree un nouveau profil utilisable pour le staffing et les projets."
+            description = "Cree un nouveau profil utilisable pour le staffing et les projets. "
+                    + "Les champs persistés par le domaine sont type, firstName, lastName, email, phone, role, seniority, active, defaultDailyRate et availabilityDate."
     )
     @ApiResponses({
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Payload invalide. Les contraintes Bean Validation du DTO de creation ne sont pas respectees.",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
             @ApiResponse(
                     responseCode = "201",
                     description = "Profil cree avec succes.",
@@ -89,7 +120,14 @@ public class ProfileController {
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             )
     })
-    public ResponseEntity<ProfileResponse> create(@Valid @RequestBody ProfileCreateRequest request) {
+    public ResponseEntity<ProfileResponse> create(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    description = "Payload de creation d'un profil. Les champs de maquette non modelises dans le backend, comme domain, tags, notes ou une saisie libre de skills/keySkills, ne sont pas acceptes par cette operation."
+            )
+            @Valid
+            @org.springframework.web.bind.annotation.RequestBody ProfileCreateRequest request
+    ) {
         ProfileResponse response = profileService.create(request);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
@@ -98,12 +136,17 @@ public class ProfileController {
         return ResponseEntity.created(location).body(response);
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/{profileId}")
     @Operation(
             summary = "Modifier un profil",
-            description = "Met a jour partiellement un profil existant."
+            description = "Met a jour partiellement un profil existant. Les champs skills, domain, tags et notes ne sont pas pris en charge par cette operation."
     )
     @ApiResponses({
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Payload invalide ou etat final du profil non valide.",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
             @ApiResponse(
                     responseCode = "200",
                     description = "Profil mis a jour avec succes.",
@@ -120,8 +163,16 @@ public class ProfileController {
                     content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
             )
     })
-    public ProfileResponse patch(@PathVariable Long id, @RequestBody ProfilePatchRequest request) {
-        return profileService.patch(id, request);
+    public ProfileResponse patch(
+            @PathVariable Long profileId,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    description = "Champs persistants du profil a modifier partiellement : type, firstName, lastName, email, phone, role, seniority, active, defaultDailyRate et availabilityDate."
+            )
+            @Valid
+            @RequestBody ProfilePatchRequest request
+    ) {
+        return profileService.patch(profileId, request);
     }
 
     @DeleteMapping("/{id}")

@@ -20,6 +20,7 @@ public interface TimeEntryApiMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "mission", ignore = true)
     @Mapping(target = "profile", ignore = true)
+    @Mapping(target = "timesheet", ignore = true)
     TimeEntry toEntity(TimeEntryCreateRequest request);
 
     @Mapping(target = "missionId", source = "mission.id")

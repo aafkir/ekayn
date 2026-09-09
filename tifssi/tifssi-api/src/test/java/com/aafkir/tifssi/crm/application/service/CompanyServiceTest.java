@@ -11,9 +11,12 @@ import com.aafkir.tifssi.crm.api.dto.request.CompanyPatchRequest;
 import com.aafkir.tifssi.crm.api.dto.response.CompanyResponse;
 import com.aafkir.tifssi.crm.api.mapper.CompanyApiMapper;
 import com.aafkir.tifssi.crm.domain.model.Company;
+import com.aafkir.tifssi.crm.infrastructure.repository.ContactRepository;
 import com.aafkir.tifssi.crm.infrastructure.repository.CompanyRepository;
+import com.aafkir.tifssi.projects.infrastructure.repository.ProjectRepository;
 import com.aafkir.tifssi.shared.application.exception.ResourceNotFoundException;
 import com.aafkir.tifssi.shared.application.validation.EntityValidationService;
+import com.aafkir.tifssi.staffing.infrastructure.repository.NeedRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +31,12 @@ class CompanyServiceTest {
 
     @Mock
     private CompanyRepository companyRepository;
+    @Mock
+    private ContactRepository contactRepository;
+    @Mock
+    private NeedRepository needRepository;
+    @Mock
+    private ProjectRepository projectRepository;
     @Mock
     private CompanyApiMapper companyApiMapper;
     @Mock
@@ -54,6 +63,13 @@ class CompanyServiceTest {
         CompanyCreateRequest request = new CompanyCreateRequest(
                 "Acme Conseil",
                 "Acme",
+                "client",
+                "client",
+                "Conseil",
+                "Nadia Mercier",
+                "Paris",
+                "Planifier comite",
+                null,
                 "RCS-123456",
                 "FR12345678901",
                 "https://acme.example",
@@ -75,7 +91,6 @@ class CompanyServiceTest {
             savedCompany.setId(42L);
             return savedCompany;
         });
-        when(companyApiMapper.toResponse(any(Company.class))).thenAnswer(invocation -> toResponse(invocation.getArgument(0)));
 
         CompanyResponse response = companyService.create(request);
 
@@ -95,7 +110,6 @@ class CompanyServiceTest {
 
         when(companyRepository.findById(1L)).thenReturn(Optional.of(company));
         when(companyRepository.save(any(Company.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(companyApiMapper.toResponse(any(Company.class))).thenAnswer(invocation -> toResponse(invocation.getArgument(0)));
 
         CompanyResponse response = companyService.patch(1L, request);
 
@@ -115,22 +129,4 @@ class CompanyServiceTest {
                 .hasMessage("Company with id 99 was not found.");
     }
 
-    private CompanyResponse toResponse(Company target) {
-        return new CompanyResponse(
-                target.getId(),
-                target.getLegalName(),
-                target.getDisplayName(),
-                target.getRegistrationNumber(),
-                target.getVatNumber(),
-                target.getWebsiteUrl(),
-                target.getEmailAddress(),
-                target.getPhoneNumber(),
-                target.getBillingAddress(),
-                target.getCityName(),
-                target.getPostalCode(),
-                target.getCountryCode(),
-                target.getCreatedAt(),
-                target.getUpdatedAt()
-        );
-    }
 }

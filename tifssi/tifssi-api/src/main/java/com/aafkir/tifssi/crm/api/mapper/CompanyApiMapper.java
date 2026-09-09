@@ -1,7 +1,6 @@
 package com.aafkir.tifssi.crm.api.mapper;
 
 import com.aafkir.tifssi.crm.api.dto.request.CompanyCreateRequest;
-import com.aafkir.tifssi.crm.api.dto.response.CompanyResponse;
 import com.aafkir.tifssi.crm.domain.model.Company;
 import com.aafkir.tifssi.shared.infrastructure.config.CentralMapperConfig;
 import org.mapstruct.InjectionStrategy;
@@ -20,6 +19,4 @@ public interface CompanyApiMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "contacts", ignore = true)
     Company toEntity(CompanyCreateRequest request);
-
-    CompanyResponse toResponse(Company company);
 }

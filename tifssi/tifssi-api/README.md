@@ -87,13 +87,13 @@ mvn spring-boot:run
 
 ```bash
 curl http://localhost:8080/actuator/health
-curl http://localhost:8080/api-docs
+curl http://localhost:8080/v3/api-docs
 ```
 
 Swagger UI :
 
 - metier + API REST : `http://localhost:8080/swagger-ui/index.html`
-- spec OpenAPI metier : `http://localhost:8080/api-docs`
+- spec OpenAPI metier : `http://localhost:8080/v3/api-docs`
 - health check : `http://localhost:8080/actuator/health`
 
 ## Variables utiles

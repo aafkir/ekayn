@@ -63,17 +63,17 @@ public class ProfileService {
         if (JsonNullableUtils.isDefined(request.getLastName())) {
             profile.setLastName(JsonNullableUtils.unwrap(request.getLastName()));
         }
-        if (JsonNullableUtils.isDefined(request.getEmailAddress())) {
-            profile.setEmailAddress(JsonNullableUtils.unwrap(request.getEmailAddress()));
+        if (JsonNullableUtils.isDefined(request.getEmail())) {
+            profile.setEmailAddress(JsonNullableUtils.unwrap(request.getEmail()));
         }
-        if (JsonNullableUtils.isDefined(request.getPhoneNumber())) {
-            profile.setPhoneNumber(JsonNullableUtils.unwrap(request.getPhoneNumber()));
+        if (JsonNullableUtils.isDefined(request.getPhone())) {
+            profile.setPhoneNumber(JsonNullableUtils.unwrap(request.getPhone()));
         }
-        if (JsonNullableUtils.isDefined(request.getJobTitle())) {
-            profile.setJobTitle(JsonNullableUtils.unwrap(request.getJobTitle()));
+        if (JsonNullableUtils.isDefined(request.getRole())) {
+            profile.setJobTitle(JsonNullableUtils.unwrap(request.getRole()));
         }
-        if (JsonNullableUtils.isDefined(request.getSeniorityLabel())) {
-            profile.setSeniorityLabel(JsonNullableUtils.unwrap(request.getSeniorityLabel()));
+        if (JsonNullableUtils.isDefined(request.getSeniority())) {
+            profile.setSeniorityLabel(JsonNullableUtils.unwrap(request.getSeniority()));
         }
         if (JsonNullableUtils.isDefined(request.getActive())) {
             Boolean active = JsonNullableUtils.unwrap(request.getActive());

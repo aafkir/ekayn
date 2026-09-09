@@ -178,4 +178,48 @@ class SubmissionControllerIntegrationTest extends AbstractPostgreSqlIntegrationT
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.fieldErrors[0].field").value("profileId"));
     }
+
+    @Test
+    void needScopedSubmissionEndpointsShouldSupportListAndCreate() throws Exception {
+        Company company = new Company();
+        company.setLegalName("Acme Conseil");
+        company = companyRepository.save(company);
+
+        Need need = new Need();
+        need.setCompany(company);
+        need.setTitle("Consultant Java Senior");
+        need.setStatus(NeedStatus.OPEN);
+        need = needRepository.save(need);
+
+        Profile profile = new Profile();
+        profile.setType(ProfileType.INTERNAL);
+        profile.setFirstName("Lea");
+        profile.setLastName("Martin");
+        profile.setEmailAddress("lea@example.com");
+        profile.setActive(true);
+        profile = profileRepository.save(profile);
+
+        mockMvc.perform(post("/api/needs/{needId}/submissions", need.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "profileId": %d,
+                                  "proposedDailyRate": 650.00,
+                                  "status": "SENT",
+                                  "comment": "Sent to client"
+                                }
+                                """.formatted(profile.getId())))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.needId").value(need.getId()))
+                .andExpect(jsonPath("$.profileId").value(profile.getId()))
+                .andExpect(jsonPath("$.status").value("SENT"))
+                .andExpect(jsonPath("$.submittedAt", notNullValue()))
+                .andExpect(jsonPath("$.comment").value("Sent to client"));
+
+        mockMvc.perform(get("/api/needs/{needId}/submissions", need.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].needId").value(need.getId()))
+                .andExpect(jsonPath("$[0].profileId").value(profile.getId()));
+    }
 }

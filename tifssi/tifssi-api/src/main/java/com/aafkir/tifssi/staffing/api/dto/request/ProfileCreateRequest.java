@@ -17,10 +17,10 @@ import java.time.LocalDate;
                   "type": "INTERNAL",
                   "firstName": "Nina",
                   "lastName": "Dupont",
-                  "emailAddress": "nina.dupont@tifssi.example",
-                  "phoneNumber": "+33611121314",
-                  "jobTitle": "Developpeuse backend",
-                  "seniorityLabel": "Senior",
+                  "email": "nina.dupont@tifssi.example",
+                  "phone": "+33611121314",
+                  "role": "Developpeuse backend",
+                  "seniority": "Senior",
                   "active": true,
                   "defaultDailyRate": 700.00,
                   "availabilityDate": "2026-04-15"
@@ -28,15 +28,38 @@ import java.time.LocalDate;
                 """
 )
 public record ProfileCreateRequest(
-        @NotNull ProfileType type,
-        @NotBlank @Size(max = 100) String firstName,
-        @NotBlank @Size(max = 100) String lastName,
-        @NotBlank @Email @Size(max = 150) String emailAddress,
-        @Size(max = 50) String phoneNumber,
-        @Size(max = 150) String jobTitle,
-        @Size(max = 100) String seniorityLabel,
-        @NotNull Boolean active,
-        @PositiveOrZero BigDecimal defaultDailyRate,
+        @Schema(description = "Type de profil conforme au domaine staffing.", example = "INTERNAL")
+        @NotNull
+        ProfileType type,
+        @Schema(description = "Prenom du profil.", example = "Nina")
+        @NotBlank
+        @Size(max = 100)
+        String firstName,
+        @Schema(description = "Nom du profil.", example = "Dupont")
+        @NotBlank
+        @Size(max = 100)
+        String lastName,
+        @Schema(description = "Adresse email du profil.", example = "nina.dupont@tifssi.example")
+        @NotBlank
+        @Email
+        @Size(max = 150)
+        String email,
+        @Schema(description = "Numero de telephone du profil.", example = "+33611121314")
+        @Size(max = 50)
+        String phone,
+        @Schema(description = "Role du profil. Mappe sur le champ metier jobTitle.", example = "Developpeuse backend")
+        @Size(max = 150)
+        String role,
+        @Schema(description = "Niveau de seniorite du profil. Mappe sur le champ metier seniorityLabel.", example = "Senior")
+        @Size(max = 100)
+        String seniority,
+        @Schema(description = "Indique si le profil est actif.", example = "true")
+        @NotNull
+        Boolean active,
+        @Schema(description = "Taux journalier par defaut.", example = "700.00")
+        @PositiveOrZero
+        BigDecimal defaultDailyRate,
+        @Schema(description = "Date de disponibilite du profil.", example = "2026-04-15")
         LocalDate availabilityDate
 ) {
 }

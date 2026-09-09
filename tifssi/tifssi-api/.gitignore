@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+
+# Maven / Java build output
+target/
+*.class
+
+# Logs
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Local environment files
+.env
+.env.*
+!.env.example

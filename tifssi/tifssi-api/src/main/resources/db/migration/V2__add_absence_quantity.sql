@@ -1,0 +1,5 @@
+ALTER TABLE absences.absence
+    ADD COLUMN IF NOT EXISTS quantity NUMERIC(6, 2) NOT NULL DEFAULT 0;
+
+ALTER TABLE absences.absence
+    ALTER COLUMN quantity DROP DEFAULT;

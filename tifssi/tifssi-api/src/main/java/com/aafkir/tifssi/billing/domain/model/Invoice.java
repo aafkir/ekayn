@@ -55,6 +55,11 @@ public class Invoice extends BaseEntity {
     private InvoiceStatus status;
 
     @NotNull
+    @Size(max = 3)
+    @Column(name = "currency_code", nullable = false, length = 3)
+    private String currency;
+
+    @NotNull
     @Column(name = "total_ht", nullable = false, precision = 14, scale = 2)
     private BigDecimal totalHt;
 
@@ -65,6 +70,10 @@ public class Invoice extends BaseEntity {
     @NotNull
     @Column(name = "total_ttc", nullable = false, precision = 14, scale = 2)
     private BigDecimal totalTtc;
+
+    @Size(max = 2000)
+    @Column(name = "notes", length = 2000)
+    private String notes;
 
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<InvoiceLine> invoiceLines = new ArrayList<>();

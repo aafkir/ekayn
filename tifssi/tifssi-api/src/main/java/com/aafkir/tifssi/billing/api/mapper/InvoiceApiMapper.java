@@ -22,9 +22,11 @@ public interface InvoiceApiMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "project", ignore = true)
+    @Mapping(target = "currency", ignore = true)
     @Mapping(target = "totalHt", ignore = true)
     @Mapping(target = "totalVat", ignore = true)
     @Mapping(target = "totalTtc", ignore = true)
+    @Mapping(target = "notes", ignore = true)
     @Mapping(target = "invoiceLines", ignore = true)
     Invoice toEntity(InvoiceCreateRequest request);
 

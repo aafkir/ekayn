@@ -28,7 +28,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/companies")
-@Tag(name = "CRM", description = "Gestion des entreprises clientes.")
+@Tag(name = "Companies")
 public class CompanyController {
 
     private final CompanyService companyService;

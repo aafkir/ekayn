@@ -44,6 +44,7 @@ public class Profile extends BaseEntity {
     @Column(name = "last_name", nullable = false, length = 100)
     private String lastName;
 
+    @NotBlank
     @Email
     @Size(max = 150)
     @Column(name = "email_address", nullable = false, length = 150)

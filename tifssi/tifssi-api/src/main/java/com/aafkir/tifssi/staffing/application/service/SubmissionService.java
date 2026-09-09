@@ -5,6 +5,7 @@ import com.aafkir.tifssi.shared.application.exception.RequestValidationException
 import com.aafkir.tifssi.shared.application.exception.ResourceNotFoundException;
 import com.aafkir.tifssi.shared.application.util.JsonNullableUtils;
 import com.aafkir.tifssi.shared.application.validation.EntityValidationService;
+import com.aafkir.tifssi.staffing.api.dto.request.NeedSubmissionCreateRequest;
 import com.aafkir.tifssi.staffing.api.dto.request.SubmissionCreateRequest;
 import com.aafkir.tifssi.staffing.api.dto.request.SubmissionPatchRequest;
 import com.aafkir.tifssi.staffing.api.dto.request.SubmissionStatusPatchRequest;
@@ -72,19 +73,67 @@ public class SubmissionService {
     }
 
     public SubmissionResponse create(SubmissionCreateRequest request) {
-        Need need = getNeed(request.needId());
-        Profile profile = getProfile(request.profileId());
+        return createInternal(
+                request.needId(),
+                request.profileId(),
+                request.proposedDailyRate(),
+                SubmissionStatus.PRESELECTED,
+                request.comment()
+        );
+    }
 
-        validateSubmissionCanBeCreated(need, profile);
+    public SubmissionResponse createForNeed(Long needId, NeedSubmissionCreateRequest request) {
+        return createInternal(
+                needId,
+                request.profileId(),
+                request.proposedDailyRate(),
+                request.status(),
+                request.comment()
+        );
+    }
 
-        Submission submission = submissionApiMapper.toEntity(request);
+    private SubmissionResponse createInternal(
+            Long needId,
+            Long profileId,
+            java.math.BigDecimal proposedDailyRate,
+            SubmissionStatus status,
+            String comment
+    ) {
+        Need need = getNeed(needId);
+        Profile profile = getProfile(profileId);
+
+        validateSubmissionCanBeCreated(need, profile, status);
+
+        Submission submission = new Submission();
         submission.setNeed(need);
         submission.setProfile(profile);
-        submission.setStatus(SubmissionStatus.PRESELECTED);
-        submission.setNotes(normalizeComment(request.comment()));
+        submission.setProposedDailyRate(proposedDailyRate);
+        submission.setStatus(status);
+        submission.setNotes(normalizeComment(comment));
+        if (status != SubmissionStatus.PRESELECTED) {
+            submission.setSubmittedAt(Instant.now());
+        }
 
         entityValidationService.validate(submission);
         return submissionApiMapper.toResponse(submissionRepository.save(submission));
+    }
+
+    @Transactional(readOnly = true)
+    public List<SubmissionResponse> findAllByNeed(Long needId) {
+        getNeed(needId);
+        return submissionRepository.findAllByNeedIdOrderByIdAsc(needId)
+                .stream()
+                .map(submissionApiMapper::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<SubmissionResponse> findAllByProfile(Long profileId) {
+        getProfile(profileId);
+        return submissionRepository.findAllByProfileIdOrderByIdAsc(profileId)
+                .stream()
+                .map(submissionApiMapper::toResponse)
+                .toList();
     }
 
     public SubmissionResponse patchStatus(Long id, SubmissionStatusPatchRequest request) {
@@ -138,6 +187,16 @@ public class SubmissionService {
     private void validateFilters(Long needId, Long profileId) {
         if ((needId == null && profileId == null) || (needId != null && profileId != null)) {
             throw new IllegalArgumentException("Exactly one of needId or profileId must be provided.");
+        }
+    }
+
+    private void validateSubmissionCanBeCreated(Need need, Profile profile, SubmissionStatus status) {
+        validateSubmissionCanBeCreated(need, profile);
+        if (status == SubmissionStatus.WON && submissionRepository.existsByNeedIdAndStatus(need.getId(), SubmissionStatus.WON)) {
+            throw new RequestValidationException(
+                    "Submission request is invalid.",
+                    List.of(new ApiFieldError("status", "Another submission for this need is already marked as WON."))
+            );
         }
     }
 

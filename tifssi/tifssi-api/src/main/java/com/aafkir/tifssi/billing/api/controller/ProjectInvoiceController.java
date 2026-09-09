@@ -26,7 +26,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/projects/{projectId}/invoices")
-@Tag(name = "Billing", description = "Gestion des factures rattachees a un projet.")
+@Tag(name = "Billing")
 public class ProjectInvoiceController {
 
     private final InvoiceService invoiceService;

@@ -28,7 +28,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/contacts")
-@Tag(name = "CRM", description = "Gestion des contacts clients.")
+@Tag(name = "Contacts")
 public class ContactController {
 
     private final ContactService contactService;

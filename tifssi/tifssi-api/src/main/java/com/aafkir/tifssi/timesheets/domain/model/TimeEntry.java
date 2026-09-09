@@ -14,6 +14,7 @@ import jakarta.persistence.ForeignKey;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -29,6 +30,10 @@ import lombok.Setter;
 @Entity
 @Table(name = "time_entry", schema = "timesheets")
 public class TimeEntry extends BaseEntity {
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "timesheet_id", foreignKey = @ForeignKey(name = "fk_time_entry_timesheet"))
+    private Timesheet timesheet;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

@@ -1,0 +1,19 @@
+# Scope this repository to the API workspace only.
+/*
+!/.gitignore
+!/tifssi/
+/tifssi/*
+!/tifssi/tifssi-api/
+!/tifssi/tifssi-api/**
+
+# Local clutter
+**/.DS_Store
+**/target/
+**/*.class
+**/*.log
+**/.idea/
+**/.vscode/
+**/*.iml
+**/.env
+**/.env.*
+!**/.env.example

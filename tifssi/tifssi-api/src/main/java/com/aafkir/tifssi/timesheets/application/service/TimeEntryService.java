@@ -99,18 +99,14 @@ public class TimeEntryService {
 
     @Transactional(readOnly = true)
     public List<TimeEntryResponse> findAll(Long missionId, Long profileId) {
-        validateListFilters(missionId, profileId);
-
         if (missionId != null) {
             missionService.getMission(missionId);
-            return timeEntryRepository.findAllByMissionIdOrderByWorkDateAscIdAsc(missionId)
-                    .stream()
-                    .map(timeEntryApiMapper::toResponse)
-                    .toList();
+        }
+        if (profileId != null) {
+            profileService.getProfile(profileId);
         }
 
-        profileService.getProfile(profileId);
-        return timeEntryRepository.findAllByProfileIdOrderByWorkDateAscIdAsc(profileId)
+        return timeEntryRepository.findAllByFilters(missionId, profileId)
                 .stream()
                 .map(timeEntryApiMapper::toResponse)
                 .toList();
@@ -155,12 +151,6 @@ public class TimeEntryService {
     public TimeEntry getTimeEntry(Long id) {
         return timeEntryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("TimeEntry", id));
-    }
-
-    private void validateListFilters(Long missionId, Long profileId) {
-        if ((missionId == null && profileId == null) || (missionId != null && profileId != null)) {
-            throw new IllegalArgumentException("Exactly one of missionId or profileId must be provided.");
-        }
     }
 
     private void validateTimeEntryRelations(TimeEntry timeEntry) {

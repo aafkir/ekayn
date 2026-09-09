@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDate;
 
 @Schema(
         description = "Payload de creation d'une entreprise cliente.",
@@ -26,6 +27,13 @@ import jakarta.validation.constraints.Size;
 public record CompanyCreateRequest(
         @NotBlank @Size(max = 150) String legalName,
         @Size(max = 150) String displayName,
+        @Size(max = 30) String relationType,
+        @Size(max = 30) String status,
+        @Size(max = 100) String sector,
+        @Size(max = 150) String managerName,
+        @Size(max = 100) String agency,
+        @Size(max = 150) String currentAction,
+        LocalDate actionDate,
         @Size(max = 50) String registrationNumber,
         @Size(max = 50) String vatNumber,
         @Size(max = 255) String websiteUrl,

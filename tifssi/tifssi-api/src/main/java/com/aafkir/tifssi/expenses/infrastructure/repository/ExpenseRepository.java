@@ -21,4 +21,6 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     List<Expense> findAllByMissionIdAndExpenseDateBetweenOrderByExpenseDateAscIdAsc(Long missionId, LocalDate startDate, LocalDate endDate);
 
     List<Expense> findAllByMissionIdInAndStatusOrderByExpenseDateAscIdAsc(List<Long> missionIds, ExpenseStatus status);
+
+    boolean existsByMissionIdAndProfileIdAndExpenseDateAndComment(Long missionId, Long profileId, LocalDate expenseDate, String comment);
 }

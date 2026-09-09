@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.aafkir.tifssi.crm.domain.model.Company;
@@ -13,6 +14,7 @@ import com.aafkir.tifssi.projects.domain.enums.MissionStatus;
 import com.aafkir.tifssi.projects.domain.model.Mission;
 import com.aafkir.tifssi.projects.domain.model.Project;
 import com.aafkir.tifssi.shared.application.validation.EntityValidationService;
+import com.aafkir.tifssi.shared.application.exception.ResourceNotFoundException;
 import com.aafkir.tifssi.staffing.application.service.ProfileService;
 import com.aafkir.tifssi.staffing.domain.enums.ProfileType;
 import com.aafkir.tifssi.staffing.domain.model.Profile;
@@ -32,6 +34,8 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -232,6 +236,53 @@ class TimeEntryServiceTest {
         assertThat(response.totalDayQuantity()).isEqualByComparingTo("2.00");
         assertThat(response.totalHalfDayQuantity()).isEqualByComparingTo("1.50");
         assertThat(response.totalHourQuantity()).isEqualByComparingTo("7.50");
+    }
+
+    @ParameterizedTest
+    @CsvSource({",", "1,", ",2", "1,2"})
+    void findAllShouldApplyOptionalFiltersAndMapEntries(Long missionId, Long profileId) {
+        TimeEntry entry = new TimeEntry();
+        entry.setId(10L);
+        entry.setMission(mission);
+        entry.setProfile(profile);
+        if (missionId != null) {
+            when(missionService.getMission(missionId)).thenReturn(mission);
+        }
+        if (profileId != null) {
+            when(profileService.getProfile(profileId)).thenReturn(profile);
+        }
+        when(timeEntryRepository.findAllByFilters(missionId, profileId)).thenReturn(List.of(entry));
+        when(timeEntryApiMapper.toResponse(entry)).thenReturn(toResponse(entry));
+
+        assertThat(timeEntryService.findAll(missionId, profileId)).containsExactly(toResponse(entry));
+
+        if (missionId == null) {
+            verifyNoInteractions(missionService);
+        } else {
+            verify(missionService).getMission(missionId);
+        }
+        if (profileId == null) {
+            verifyNoInteractions(profileService);
+        } else {
+            verify(profileService).getProfile(profileId);
+        }
+    }
+
+    @Test
+    void findAllShouldPreserveMissionLookupFailure() {
+        when(missionService.getMission(1L)).thenThrow(new ResourceNotFoundException("Mission", 1L));
+        assertThatThrownBy(() -> timeEntryService.findAll(1L, null))
+                .isInstanceOf(ResourceNotFoundException.class);
+        verifyNoInteractions(timeEntryRepository);
+    }
+
+    @Test
+    void findAllShouldPreserveProfileLookupFailureWithBothFilters() {
+        when(missionService.getMission(1L)).thenReturn(mission);
+        when(profileService.getProfile(2L)).thenThrow(new ResourceNotFoundException("Profile", 2L));
+        assertThatThrownBy(() -> timeEntryService.findAll(1L, 2L))
+                .isInstanceOf(ResourceNotFoundException.class);
+        verifyNoInteractions(timeEntryRepository);
     }
 
     private TimeEntryResponse toResponse(TimeEntry timeEntry) {

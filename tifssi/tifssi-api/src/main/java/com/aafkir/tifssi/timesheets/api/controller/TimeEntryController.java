@@ -31,7 +31,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/time-entries")
-@Tag(name = "Timesheets", description = "Gestion des saisies de temps.")
+@Tag(name = "Time Entries")
 public class TimeEntryController {
 
     private final TimeEntryService timeEntryService;
@@ -109,7 +109,10 @@ public class TimeEntryController {
     @GetMapping
     @Operation(
             summary = "Lister les saisies de temps",
-            description = "Retourne les saisies de temps filtrees par mission, par profil, ou l'ensemble si aucun filtre n'est fourni."
+            description = "Retourne la liste globale des saisies de temps sans parametre (Backoffice > Activite > CRA). "
+                    + "missionId filtre la vue Mission > CRA et profileId filtre la vue Profil. "
+                    + "Les deux filtres sont facultatifs et cumulables (intersection). "
+                    + "La liste n'est pas paginee et est triee par workDate puis id croissants."
     )
     @ApiResponses({
             @ApiResponse(

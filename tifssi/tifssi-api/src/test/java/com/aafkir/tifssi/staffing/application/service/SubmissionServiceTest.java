@@ -11,6 +11,7 @@ import com.aafkir.tifssi.crm.domain.model.Company;
 import com.aafkir.tifssi.shared.api.error.ApiFieldError;
 import com.aafkir.tifssi.shared.application.exception.RequestValidationException;
 import com.aafkir.tifssi.shared.application.validation.EntityValidationService;
+import com.aafkir.tifssi.staffing.api.dto.request.NeedSubmissionCreateRequest;
 import com.aafkir.tifssi.staffing.api.dto.request.SubmissionCreateRequest;
 import com.aafkir.tifssi.staffing.api.dto.request.SubmissionPatchRequest;
 import com.aafkir.tifssi.staffing.api.dto.request.SubmissionStatusPatchRequest;
@@ -81,12 +82,9 @@ class SubmissionServiceTest {
     @Test
     void createShouldPersistPreselectedSubmission() {
         SubmissionCreateRequest request = new SubmissionCreateRequest(1L, 2L, new BigDecimal("650.00"), "  First shortlist  ");
-        Submission mappedSubmission = new Submission();
-        mappedSubmission.setProposedDailyRate(request.proposedDailyRate());
 
         when(needRepository.findById(1L)).thenReturn(Optional.of(need));
         when(profileRepository.findById(2L)).thenReturn(Optional.of(profile));
-        when(submissionApiMapper.toEntity(request)).thenReturn(mappedSubmission);
         when(submissionRepository.save(any(Submission.class))).thenAnswer(invocation -> {
             Submission submission = invocation.getArgument(0);
             submission.setId(99L);
@@ -111,6 +109,34 @@ class SubmissionServiceTest {
         assertThat(savedSubmission.getProfile()).isSameAs(profile);
         assertThat(savedSubmission.getStatus()).isEqualTo(SubmissionStatus.PRESELECTED);
         assertThat(savedSubmission.getNotes()).isEqualTo("First shortlist");
+    }
+
+    @Test
+    void createForNeedShouldPersistRequestedStatusAndSubmittedAt() {
+        NeedSubmissionCreateRequest request = new NeedSubmissionCreateRequest(
+                2L,
+                new BigDecimal("700.00"),
+                SubmissionStatus.SENT,
+                "  Sent to client  "
+        );
+
+        when(needRepository.findById(1L)).thenReturn(Optional.of(need));
+        when(profileRepository.findById(2L)).thenReturn(Optional.of(profile));
+        when(submissionRepository.save(any(Submission.class))).thenAnswer(invocation -> {
+            Submission submission = invocation.getArgument(0);
+            submission.setId(100L);
+            return submission;
+        });
+        when(submissionApiMapper.toResponse(any(Submission.class))).thenAnswer(invocation -> toResponse(invocation.getArgument(0)));
+
+        SubmissionResponse response = submissionService.createForNeed(1L, request);
+
+        assertThat(response.id()).isEqualTo(100L);
+        assertThat(response.needId()).isEqualTo(1L);
+        assertThat(response.profileId()).isEqualTo(2L);
+        assertThat(response.status()).isEqualTo(SubmissionStatus.SENT);
+        assertThat(response.submittedAt()).isNotNull();
+        assertThat(response.comment()).isEqualTo("Sent to client");
     }
 
     @Test
@@ -180,16 +206,33 @@ class SubmissionServiceTest {
     @Test
     void createShouldRejectBlankComment() {
         SubmissionCreateRequest request = new SubmissionCreateRequest(1L, 2L, null, "   ");
-        Submission mappedSubmission = new Submission();
 
         when(needRepository.findById(1L)).thenReturn(Optional.of(need));
         when(profileRepository.findById(2L)).thenReturn(Optional.of(profile));
-        when(submissionApiMapper.toEntity(request)).thenReturn(mappedSubmission);
 
         assertThatThrownBy(() -> submissionService.create(request))
                 .isInstanceOfSatisfying(RequestValidationException.class, exception ->
                         assertThat(exception.getFieldErrors())
                                 .containsExactly(new ApiFieldError("comment", "comment must not be blank.")));
+
+        verify(submissionRepository, never()).save(any(Submission.class));
+    }
+
+    @Test
+    void createForNeedShouldRejectSecondWonSubmissionForSameNeed() {
+        NeedSubmissionCreateRequest request = new NeedSubmissionCreateRequest(2L, null, SubmissionStatus.WON, null);
+
+        when(needRepository.findById(1L)).thenReturn(Optional.of(need));
+        when(profileRepository.findById(2L)).thenReturn(Optional.of(profile));
+        when(submissionRepository.existsByNeedIdAndStatus(1L, SubmissionStatus.WON)).thenReturn(true);
+
+        assertThatThrownBy(() -> submissionService.createForNeed(1L, request))
+                .isInstanceOfSatisfying(RequestValidationException.class, exception ->
+                        assertThat(exception.getFieldErrors())
+                                .containsExactly(new ApiFieldError(
+                                        "status",
+                                        "Another submission for this need is already marked as WON."
+                                )));
 
         verify(submissionRepository, never()).save(any(Submission.class));
     }

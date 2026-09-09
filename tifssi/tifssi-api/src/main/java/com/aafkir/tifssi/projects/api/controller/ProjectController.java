@@ -28,7 +28,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/projects")
-@Tag(name = "Projects", description = "Gestion des projets.")
+@Tag(name = "Projects")
 public class ProjectController {
 
     private final ProjectService projectService;

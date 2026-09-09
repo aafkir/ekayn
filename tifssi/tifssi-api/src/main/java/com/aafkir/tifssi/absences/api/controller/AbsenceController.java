@@ -32,7 +32,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/absences")
-@Tag(name = "Absences", description = "Gestion des absences collaborateurs.")
+@Tag(name = "Absences")
 public class AbsenceController {
 
     private final AbsenceService absenceService;

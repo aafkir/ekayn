@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.aafkir.tifssi.shared.application.validation.EntityValidationService;
+import com.aafkir.tifssi.shared.application.exception.ResourceNotFoundException;
 import com.aafkir.tifssi.staffing.api.dto.request.ProfileCreateRequest;
 import com.aafkir.tifssi.staffing.api.dto.request.ProfilePatchRequest;
 import com.aafkir.tifssi.staffing.api.dto.response.ProfileResponse;
@@ -75,7 +76,10 @@ class ProfileServiceTest {
         mappedProfile.setType(request.type());
         mappedProfile.setFirstName(request.firstName());
         mappedProfile.setLastName(request.lastName());
-        mappedProfile.setEmailAddress(request.emailAddress());
+        mappedProfile.setEmailAddress(request.email());
+        mappedProfile.setPhoneNumber(request.phone());
+        mappedProfile.setJobTitle(request.role());
+        mappedProfile.setSeniorityLabel(request.seniority());
         mappedProfile.setActive(request.active());
         mappedProfile.setDefaultDailyRate(request.defaultDailyRate());
         mappedProfile.setAvailabilityDate(request.availabilityDate());
@@ -99,8 +103,14 @@ class ProfileServiceTest {
     @Test
     void patchShouldUpdateMutableFields() {
         ProfilePatchRequest request = new ProfilePatchRequest();
-        request.setJobTitle(JsonNullable.of("Lead Backend"));
-        request.setSeniorityLabel(JsonNullable.of("Expert"));
+        request.setType(JsonNullable.of(ProfileType.EXTERNAL));
+        request.setFirstName(JsonNullable.of("Lea"));
+        request.setLastName(JsonNullable.of("Martin"));
+        request.setEmail(JsonNullable.of("lea.martin@tifssi.example"));
+        request.setPhone(JsonNullable.of("+33615161718"));
+        request.setRole(JsonNullable.of("Lead Backend"));
+        request.setSeniority(JsonNullable.of("Expert"));
+        request.setActive(JsonNullable.of(false));
         request.setDefaultDailyRate(JsonNullable.of(new BigDecimal("750.00")));
         request.setAvailabilityDate(JsonNullable.of(LocalDate.of(2026, 4, 22)));
 
@@ -110,8 +120,14 @@ class ProfileServiceTest {
 
         ProfileResponse response = profileService.patch(1L, request);
 
+        assertThat(response.type()).isEqualTo(ProfileType.EXTERNAL);
+        assertThat(response.firstName()).isEqualTo("Lea");
+        assertThat(response.lastName()).isEqualTo("Martin");
+        assertThat(response.emailAddress()).isEqualTo("lea.martin@tifssi.example");
+        assertThat(response.phoneNumber()).isEqualTo("+33615161718");
         assertThat(response.jobTitle()).isEqualTo("Lead Backend");
         assertThat(response.seniorityLabel()).isEqualTo("Expert");
+        assertThat(response.active()).isFalse();
         assertThat(response.defaultDailyRate()).isEqualByComparingTo("750.00");
         assertThat(response.availabilityDate()).isEqualTo(LocalDate.of(2026, 4, 22));
         verify(entityValidationService).validate(profile);
@@ -127,6 +143,17 @@ class ProfileServiceTest {
         assertThatThrownBy(() -> profileService.patch(1L, request))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("active cannot be null.");
+
+        verify(profileRepository, never()).save(any(Profile.class));
+    }
+
+    @Test
+    void patchShouldRejectUnknownProfile() {
+        when(profileRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> profileService.patch(99L, new ProfilePatchRequest()))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Profile with id 99 was not found.");
 
         verify(profileRepository, never()).save(any(Profile.class));
     }

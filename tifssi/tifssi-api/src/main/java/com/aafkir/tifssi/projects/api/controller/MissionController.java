@@ -28,7 +28,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/missions")
-@Tag(name = "Projects", description = "Gestion des missions projet.")
+@Tag(name = "Missions")
 public class MissionController {
 
     private final MissionService missionService;

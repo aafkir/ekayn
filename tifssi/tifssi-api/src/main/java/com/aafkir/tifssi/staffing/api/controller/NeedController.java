@@ -2,11 +2,15 @@ package com.aafkir.tifssi.staffing.api.controller;
 
 import com.aafkir.tifssi.projects.api.dto.response.ProjectResponse;
 import com.aafkir.tifssi.shared.api.error.ApiErrorResponse;
+import com.aafkir.tifssi.staffing.api.dto.request.NeedSubmissionCreateRequest;
 import com.aafkir.tifssi.staffing.api.dto.request.NeedCreateRequest;
 import com.aafkir.tifssi.staffing.api.dto.request.NeedPatchRequest;
 import com.aafkir.tifssi.staffing.api.dto.response.NeedResponse;
+import com.aafkir.tifssi.staffing.api.dto.response.SubmissionResponse;
 import com.aafkir.tifssi.staffing.application.service.NeedService;
+import com.aafkir.tifssi.staffing.application.service.SubmissionService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -29,13 +33,15 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/needs")
-@Tag(name = "Staffing", description = "Gestion des besoins de staffing.")
+@Tag(name = "Needs")
 public class NeedController {
 
     private final NeedService needService;
+    private final SubmissionService submissionService;
 
-    public NeedController(NeedService needService) {
+    public NeedController(NeedService needService, SubmissionService submissionService) {
         this.needService = needService;
+        this.submissionService = submissionService;
     }
 
     @GetMapping
@@ -71,6 +77,70 @@ public class NeedController {
     })
     public NeedResponse findById(@PathVariable Long id) {
         return needService.findById(id);
+    }
+
+    @GetMapping("/{needId}/submissions")
+    @Operation(
+            summary = "Lister les positionnements d'un besoin",
+            description = "Retourne les positionnements rattaches au besoin fourni."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Liste des positionnements du besoin retournee avec succes.",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = SubmissionResponse.class)))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Besoin introuvable.",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
+    public List<SubmissionResponse> findSubmissionsByNeed(
+            @Parameter(description = "Identifiant du besoin.")
+            @PathVariable Long needId
+    ) {
+        return submissionService.findAllByNeed(needId);
+    }
+
+    @PostMapping("/{needId}/submissions")
+    @Operation(
+            summary = "Creer un positionnement pour un besoin",
+            description = "Cree un nouveau positionnement explicitement lie au besoin fourni et au profil du payload."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Positionnement cree avec succes.",
+                    content = @Content(schema = @Schema(implementation = SubmissionResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Payload invalide ou regle metier non respectee.",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Besoin ou profil introuvable.",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Le positionnement est en conflit avec une contrainte d'integrite.",
+                    content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+            )
+    })
+    public ResponseEntity<SubmissionResponse> createSubmission(
+            @Parameter(description = "Identifiant du besoin.")
+            @PathVariable Long needId,
+            @Valid @RequestBody NeedSubmissionCreateRequest request
+    ) {
+        SubmissionResponse response = submissionService.createForNeed(needId, request);
+        URI location = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/api/submissions/{id}")
+                .buildAndExpand(response.id())
+                .toUri();
+        return ResponseEntity.created(location).body(response);
     }
 
     @PostMapping

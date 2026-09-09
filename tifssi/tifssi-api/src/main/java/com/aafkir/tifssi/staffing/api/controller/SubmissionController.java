@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/submissions")
-@Tag(name = "Staffing", description = "Gestion des positionnements entre besoins et profils.")
+@Tag(name = "Submissions")
 public class SubmissionController {
 
     private final SubmissionService submissionService;
@@ -56,6 +56,12 @@ public class SubmissionController {
             @Parameter(description = "Identifiant du profil pour filtrer les positionnements.")
             @RequestParam(required = false) Long profileId
     ) {
+        if (needId != null) {
+            return submissionService.findAllByNeed(needId);
+        }
+        if (profileId != null) {
+            return submissionService.findAllByProfile(profileId);
+        }
         return submissionService.findAll(needId, profileId);
     }
 

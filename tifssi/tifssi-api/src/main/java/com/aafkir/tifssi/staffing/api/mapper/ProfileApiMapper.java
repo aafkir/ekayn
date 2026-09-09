@@ -18,6 +18,10 @@ public interface ProfileApiMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "emailAddress", source = "email")
+    @Mapping(target = "phoneNumber", source = "phone")
+    @Mapping(target = "jobTitle", source = "role")
+    @Mapping(target = "seniorityLabel", source = "seniority")
     @Mapping(target = "profileSkills", ignore = true)
     @Mapping(target = "submissions", ignore = true)
     Profile toEntity(ProfileCreateRequest request);

@@ -157,6 +157,67 @@ class TimeEntryControllerIntegrationTest extends AbstractPostgreSqlIntegrationTe
                 .andExpect(jsonPath("$.message").value("workDate must be less than or equal to mission endDate."));
     }
 
+    @Test
+    void listShouldSupportGlobalContextualAndCombinedFiltersWithStableOrder() throws Exception {
+        TestData first = createMissionAndProfile();
+        TestData second = createMissionAndProfile();
+        long later = createEntry(first, "2026-04-20");
+        long earlier = createEntry(second, "2026-04-10");
+        long sameDate = createEntry(first, "2026-04-10");
+
+        mockMvc.perform(get("/api/time-entries"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(3)))
+                .andExpect(jsonPath("$[0].id").value(earlier))
+                .andExpect(jsonPath("$[1].id").value(sameDate))
+                .andExpect(jsonPath("$[2].id").value(later));
+
+        for (String filter : new String[]{"missionId", "profileId"}) {
+            Long id = filter.equals("missionId") ? first.mission().getId() : first.profile().getId();
+            mockMvc.perform(get("/api/time-entries").param(filter, id.toString()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$", hasSize(2)))
+                    .andExpect(jsonPath("$[0].id").value(sameDate))
+                    .andExpect(jsonPath("$[1].id").value(later));
+            mockMvc.perform(get("/api/time-entries").param(filter, "9223372036854775807"))
+                    .andExpect(status().isNotFound());
+            mockMvc.perform(get("/api/time-entries").param(filter, "invalid"))
+                    .andExpect(status().isBadRequest());
+        }
+
+        mockMvc.perform(get("/api/time-entries")
+                        .param("missionId", first.mission().getId().toString())
+                        .param("profileId", first.profile().getId().toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].id").value(sameDate))
+                .andExpect(jsonPath("$[1].id").value(later));
+        mockMvc.perform(get("/api/time-entries")
+                        .param("missionId", first.mission().getId().toString())
+                        .param("profileId", second.profile().getId().toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
+    }
+
+    @Test
+    void listShouldReturnEmptyArrayWithoutEntries() throws Exception {
+        mockMvc.perform(get("/api/time-entries"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
+    }
+
+    private long createEntry(TestData data, String workDate) throws Exception {
+        MvcResult result = mockMvc.perform(post("/api/time-entries")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"missionId": %d, "profileId": %d, "workDate": "%s",
+                                 "quantity": 1.00, "unitType": "DAY", "status": "DRAFT"}
+                                """.formatted(data.mission().getId(), data.profile().getId(), workDate)))
+                .andExpect(status().isCreated())
+                .andReturn();
+        return objectMapper.readTree(result.getResponse().getContentAsString()).path("id").asLong();
+    }
+
     private TestData createMissionAndProfile() {
         Company company = new Company();
         company.setLegalName("Acme Conseil");
@@ -166,13 +227,13 @@ class TimeEntryControllerIntegrationTest extends AbstractPostgreSqlIntegrationTe
         profile.setType(ProfileType.INTERNAL);
         profile.setFirstName("Lea");
         profile.setLastName("Martin");
-        profile.setEmailAddress("lea@example.com");
+        profile.setEmailAddress("lea-" + company.getId() + "@example.com");
         profile.setActive(true);
         profile = profileRepository.save(profile);
 
         Project project = new Project();
         project.setCompany(company);
-        project.setProjectCode("PRJ-TS-001");
+        project.setProjectCode("PRJ-TS-" + company.getId());
         project.setProjectName("Timesheets MVP");
         project.setStatus(ProjectStatus.ACTIVE);
         project = projectRepository.save(project);

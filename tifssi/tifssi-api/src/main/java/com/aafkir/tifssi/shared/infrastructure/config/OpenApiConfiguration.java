@@ -23,13 +23,18 @@ public class OpenApiConfiguration {
                 .info(new Info()
                         .title("Tifssi API")
                         .version("v1")
-                        .description("Documentation OpenAPI des APIs CRM, staffing, projets, timesheets, expenses, absences, billing et monitoring."))
+                        .description("Documentation OpenAPI des APIs metier Tifssi et des endpoints de supervision."))
                 .tags(List.of(
-                        new Tag().name("CRM").description("Gestion des entreprises clientes et de leurs contacts."),
-                        new Tag().name("Staffing").description("Gestion des besoins, profils et positionnements."),
-                        new Tag().name("Projects").description("Gestion des projets et des missions."),
-                        new Tag().name("Timesheets").description("Gestion des saisies de temps et des syntheses de periode."),
-                        new Tag().name("Expenses").description("Gestion des notes de frais et des syntheses de periode."),
+                        new Tag().name("Companies").description("Gestion des societes clientes."),
+                        new Tag().name("Contacts").description("Gestion des contacts rattaches aux societes clientes."),
+                        new Tag().name("Actions").description("Gestion des actions CRM et du suivi commercial."),
+                        new Tag().name("Needs").description("Gestion des besoins de staffing."),
+                        new Tag().name("Profiles").description("Gestion des profils staffing."),
+                        new Tag().name("Submissions").description("Gestion des positionnements entre besoins et profils."),
+                        new Tag().name("Projects").description("Gestion des projets."),
+                        new Tag().name("Missions").description("Gestion des missions rattachees aux projets."),
+                        new Tag().name("Time Entries").description("Gestion des saisies de temps et de leurs syntheses."),
+                        new Tag().name("Expenses").description("Gestion des notes de frais et de leurs syntheses."),
                         new Tag().name("Absences").description("Gestion des absences collaborateurs et de leurs syntheses annuelles."),
                         new Tag().name("Billing").description("Gestion des factures projet et des lignes de facturation."),
                         new Tag().name("Monitoring").description("Supervision technique et etat de sante de l'application.")

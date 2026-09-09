@@ -31,7 +31,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/expenses")
-@Tag(name = "Expenses", description = "Gestion des notes de frais.")
+@Tag(name = "Expenses")
 public class ExpenseController {
 
     private final ExpenseService expenseService;

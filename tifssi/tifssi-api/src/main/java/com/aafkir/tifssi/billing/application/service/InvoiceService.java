@@ -46,6 +46,7 @@ public class InvoiceService {
     private static final BigDecimal HUNDRED = new BigDecimal("100.00");
     private static final BigDecimal HOURS_PER_DAY = new BigDecimal("8.00");
     private static final BigDecimal DEFAULT_VAT_RATE = new BigDecimal("20.00");
+    private static final String DEFAULT_CURRENCY = "EUR";
 
     private final InvoiceRepository invoiceRepository;
     private final InvoiceLineRepository invoiceLineRepository;
@@ -82,6 +83,7 @@ public class InvoiceService {
         Invoice invoice = invoiceApiMapper.toEntity(request);
         invoice.setProject(project);
         invoice.setInvoiceNumber(normalizeInvoiceNumber(request.invoiceNumber()));
+        invoice.setCurrency(DEFAULT_CURRENCY);
         invoice.setTotalHt(ZERO);
         invoice.setTotalVat(ZERO);
         invoice.setTotalTtc(ZERO);

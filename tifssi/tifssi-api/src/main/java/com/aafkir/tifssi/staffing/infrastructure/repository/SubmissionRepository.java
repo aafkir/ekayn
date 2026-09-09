@@ -13,5 +13,7 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
 
     boolean existsByNeedIdAndProfileId(Long needId, Long profileId);
 
+    boolean existsByNeedIdAndStatus(Long needId, SubmissionStatus status);
+
     boolean existsByNeedIdAndStatusAndIdNot(Long needId, SubmissionStatus status, Long id);
 }
