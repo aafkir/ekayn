@@ -30,6 +30,6 @@ public record TimeEntryCreateRequest(
         @NotNull @Positive BigDecimal quantity,
         @NotNull TimeEntryUnitType unitType,
         @Size(max = 1000) String comment,
-        @NotNull TimeEntryStatus status
+        @Schema(deprecated = true, description = "Compatibilité uniquement : omis ou DRAFT. La validation se fait sur Timesheet.", allowableValues = {"DRAFT"}) TimeEntryStatus status
 ) {
 }

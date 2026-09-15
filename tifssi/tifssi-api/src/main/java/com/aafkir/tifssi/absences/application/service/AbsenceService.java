@@ -6,6 +6,8 @@ import com.aafkir.tifssi.absences.api.dto.response.AbsenceResponse;
 import com.aafkir.tifssi.absences.api.dto.response.AbsenceSummaryResponse;
 import com.aafkir.tifssi.absences.api.mapper.AbsenceApiMapper;
 import com.aafkir.tifssi.absences.domain.model.Absence;
+import com.aafkir.tifssi.absences.domain.enums.AbsenceStatus;
+import com.aafkir.tifssi.absences.domain.enums.AbsenceType;
 import com.aafkir.tifssi.absences.infrastructure.repository.AbsenceRepository;
 import com.aafkir.tifssi.shared.application.exception.ResourceNotFoundException;
 import com.aafkir.tifssi.shared.application.util.JsonNullableUtils;
@@ -90,18 +92,23 @@ public class AbsenceService {
     }
 
     @Transactional(readOnly = true)
-    public List<AbsenceResponse> findAll(Long profileId, LocalDate startDate, LocalDate endDate) {
-        if (profileId == null) {
-            throw new IllegalArgumentException("profileId is required.");
-        }
+    public List<AbsenceResponse> findAll(Long profileId, AbsenceStatus status, AbsenceType type, LocalDate startDate, LocalDate endDate) {
         validateQueryPeriod(startDate, endDate);
-
-        profileService.getProfile(profileId);
-        return absenceRepository.findAllByProfileIdOrderByStartDateAscIdAsc(profileId)
+        if (profileId != null) profileService.getProfile(profileId);
+        List<Absence> source = profileId == null
+                ? absenceRepository.findAllByOrderByStartDateAscIdAsc()
+                : absenceRepository.findAllByProfileIdOrderByStartDateAscIdAsc(profileId);
+        return source
                 .stream()
+                .filter(absence -> status == null || absence.getStatus() == status)
+                .filter(absence -> type == null || absence.getType() == type)
                 .filter(absence -> overlaps(absence, startDate, endDate))
                 .map(absenceApiMapper::toResponse)
                 .toList();
+    }
+
+    public List<AbsenceResponse> findAll(Long profileId, LocalDate startDate, LocalDate endDate) {
+        return findAll(profileId, null, null, startDate, endDate);
     }
 
     @Transactional(readOnly = true)

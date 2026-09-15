@@ -5,6 +5,8 @@ import com.aafkir.tifssi.staffing.api.dto.request.ProfileCreateRequest;
 import com.aafkir.tifssi.staffing.api.dto.request.ProfilePatchRequest;
 import com.aafkir.tifssi.staffing.api.dto.response.ProfileResponse;
 import com.aafkir.tifssi.staffing.api.dto.response.ProfileSkillResponse;
+import com.aafkir.tifssi.staffing.api.dto.response.CurrentUserProfileResponse;
+import com.aafkir.tifssi.staffing.application.service.CurrentUserProfileService;
 import com.aafkir.tifssi.staffing.application.service.ProfileService;
 import com.aafkir.tifssi.staffing.application.service.ProfileSkillService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import java.security.Principal;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
@@ -35,10 +38,18 @@ public class ProfileController {
 
     private final ProfileService profileService;
     private final ProfileSkillService profileSkillService;
+    private final CurrentUserProfileService currentUserProfileService;
 
-    public ProfileController(ProfileService profileService, ProfileSkillService profileSkillService) {
+    public ProfileController(ProfileService profileService, ProfileSkillService profileSkillService, CurrentUserProfileService currentUserProfileService) {
         this.profileService = profileService;
         this.profileSkillService = profileSkillService;
+        this.currentUserProfileService = currentUserProfileService;
+    }
+
+    @GetMapping("/me")
+    @Operation(summary = "Lire le contexte utilisateur courant", description = "Associe l'identité authentifiée au profil métier. En DEV sans authentification, le mapping utilise app.dev.current-user-email.")
+    public CurrentUserProfileResponse me(Principal principal) {
+        return currentUserProfileService.get(principal);
     }
 
     @GetMapping

@@ -42,6 +42,8 @@ class ExpenseControllerIntegrationTest extends AbstractPostgreSqlIntegrationTest
     @Autowired
     private ExpenseRepository expenseRepository;
     @Autowired
+    private com.aafkir.tifssi.expenses.infrastructure.repository.ExpenseReportRepository expenseReportRepository;
+    @Autowired
     private MissionRepository missionRepository;
     @Autowired
     private ProjectRepository projectRepository;
@@ -53,6 +55,7 @@ class ExpenseControllerIntegrationTest extends AbstractPostgreSqlIntegrationTest
     @AfterEach
     void cleanUp() {
         expenseRepository.deleteAllInBatch();
+        expenseReportRepository.deleteAllInBatch();
         missionRepository.deleteAllInBatch();
         projectRepository.deleteAllInBatch();
         profileRepository.deleteAllInBatch();
@@ -117,7 +120,7 @@ class ExpenseControllerIntegrationTest extends AbstractPostgreSqlIntegrationTest
                                   "currency": "usd",
                                   "comment": "Updated meal",
                                   "receiptUrl": "https://cdn.example.com/meal.pdf",
-                                  "status": "VALIDATED",
+                                  "status": "DRAFT",
                                   "billable": false
                                 }
                                 """))
@@ -127,7 +130,7 @@ class ExpenseControllerIntegrationTest extends AbstractPostgreSqlIntegrationTest
                 .andExpect(jsonPath("$.currency").value("USD"))
                 .andExpect(jsonPath("$.comment").value("Updated meal"))
                 .andExpect(jsonPath("$.receiptUrl").value("https://cdn.example.com/meal.pdf"))
-                .andExpect(jsonPath("$.status").value("VALIDATED"))
+                .andExpect(jsonPath("$.status").value("DRAFT"))
                 .andExpect(jsonPath("$.billable").value(false));
 
         mockMvc.perform(get("/api/expenses/summary")

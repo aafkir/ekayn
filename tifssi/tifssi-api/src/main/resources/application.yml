@@ -48,5 +48,7 @@ management:
         include: health
 
 app:
+  dev:
+    current-user-email: ${APP_CURRENT_USER_EMAIL:nina.dupont@tifssi-dev.example}
   demo-data:
     enabled: ${APP_DEMO_DATA_ENABLED:false}

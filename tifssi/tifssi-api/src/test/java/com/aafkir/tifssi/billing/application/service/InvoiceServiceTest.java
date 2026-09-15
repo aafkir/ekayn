@@ -25,6 +25,7 @@ import com.aafkir.tifssi.billing.infrastructure.repository.InvoiceRepository;
 import com.aafkir.tifssi.crm.domain.model.Company;
 import com.aafkir.tifssi.expenses.domain.enums.ExpenseCategory;
 import com.aafkir.tifssi.expenses.domain.enums.ExpenseStatus;
+import com.aafkir.tifssi.expenses.domain.enums.ExpenseReportStatus;
 import com.aafkir.tifssi.expenses.domain.model.Expense;
 import com.aafkir.tifssi.expenses.infrastructure.repository.ExpenseRepository;
 import com.aafkir.tifssi.projects.application.service.ProjectService;
@@ -242,16 +243,20 @@ class InvoiceServiceTest {
         expense.setCategory(ExpenseCategory.TRAVEL);
         expense.setAmount(new BigDecimal("150.00"));
         expense.setCurrency("EUR");
-        expense.setStatus(ExpenseStatus.VALIDATED);
+        expense.setStatus(ExpenseStatus.DRAFT);
+        expense.setBillable(true);
+        com.aafkir.tifssi.expenses.domain.model.ExpenseReport report = new com.aafkir.tifssi.expenses.domain.model.ExpenseReport();
+        report.setStatus(ExpenseReportStatus.VALIDATED);
+        expense.setExpenseReport(report);
 
         List<InvoiceLine> storedLines = new ArrayList<>();
 
         when(invoiceRepository.findById(5L)).thenReturn(Optional.of(invoice));
         when(invoiceLineRepository.findAllByInvoiceIdOrderByDisplayOrderAscIdAsc(5L)).thenAnswer(invocation -> List.copyOf(storedLines));
         when(missionRepository.findAllByProjectIdOrderByIdAsc(1L)).thenReturn(List.of(mission));
-        when(timeEntryRepository.findAllByMissionIdInAndStatusOrderByWorkDateAscIdAsc(List.of(3L), TimeEntryStatus.VALIDATED))
+        when(timeEntryRepository.findAllByMissionIdInAndTimesheetStatusOrderByWorkDateAscIdAsc(List.of(3L), com.aafkir.tifssi.timesheets.domain.enums.TimesheetStatus.VALIDATED))
                 .thenReturn(List.of(timeEntry));
-        when(expenseRepository.findAllByMissionIdInAndStatusOrderByExpenseDateAscIdAsc(List.of(3L), ExpenseStatus.VALIDATED))
+        when(expenseRepository.findAllByMissionIdInAndExpenseReportStatusOrderByExpenseDateAscIdAsc(List.of(3L), ExpenseReportStatus.VALIDATED))
                 .thenReturn(List.of(expense));
         when(invoiceLineRepository.saveAll(anyList())).thenAnswer(invocation -> {
             @SuppressWarnings("unchecked")

@@ -20,6 +20,13 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler({com.aafkir.tifssi.timesheets.application.exception.TimesheetStateException.class,
+                       org.springframework.dao.OptimisticLockingFailureException.class,
+                       com.aafkir.tifssi.expenses.application.exception.ExpenseReportStateException.class})
+    public ResponseEntity<ApiErrorResponse> handleTimesheetConflict(RuntimeException exception, HttpServletRequest request) {
+        return buildResponse(HttpStatus.CONFLICT, "The timesheet cannot be changed: " + exception.getMessage(), request.getRequestURI(), List.of());
+    }
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleResourceNotFound(
             ResourceNotFoundException exception,

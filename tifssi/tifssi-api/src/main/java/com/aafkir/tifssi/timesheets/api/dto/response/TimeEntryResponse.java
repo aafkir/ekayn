@@ -34,7 +34,7 @@ public record TimeEntryResponse(
         BigDecimal quantity,
         TimeEntryUnitType unitType,
         String comment,
-        TimeEntryStatus status,
+        @Schema(deprecated = true, description = "Ancien statut de saisie, ne représente pas la décision mensuelle. Consulter Timesheet.status.") TimeEntryStatus status,
         Instant createdAt,
         Instant updatedAt
 ) {

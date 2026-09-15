@@ -77,6 +77,14 @@ class AbsenceControllerIntegrationTest extends AbstractPostgreSqlIntegrationTest
         org.assertj.core.api.Assertions.assertThat(mvcResult.getResponse().getHeader("Location"))
                 .isEqualTo("http://localhost/api/absences/" + absenceId);
 
+        mockMvc.perform(get("/api/absences"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)));
+
+        mockMvc.perform(get("/api/absences").param("status", "SUBMITTED").param("type", "PAID_LEAVE"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)));
+
         mockMvc.perform(get("/api/absences").param("profileId", profile.getId().toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)));

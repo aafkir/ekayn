@@ -30,6 +30,9 @@ import lombok.Setter;
 @Table(name = "expense", schema = "expenses")
 public class Expense extends BaseEntity {
 
+    @NotNull @ManyToOne(fetch=FetchType.LAZY, optional=false) @JoinColumn(name="expense_report_id", nullable=false, foreignKey=@ForeignKey(name="fk_expense_report"))
+    private ExpenseReport expenseReport;
+
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "profile_id", nullable = false, foreignKey = @ForeignKey(name = "fk_expense_profile"))

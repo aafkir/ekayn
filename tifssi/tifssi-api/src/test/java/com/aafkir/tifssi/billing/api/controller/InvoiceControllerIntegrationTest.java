@@ -14,6 +14,8 @@ import com.aafkir.tifssi.crm.infrastructure.repository.CompanyRepository;
 import com.aafkir.tifssi.expenses.domain.enums.ExpenseCategory;
 import com.aafkir.tifssi.expenses.domain.enums.ExpenseStatus;
 import com.aafkir.tifssi.expenses.domain.model.Expense;
+import com.aafkir.tifssi.expenses.domain.model.ExpenseReport;
+import com.aafkir.tifssi.expenses.domain.enums.ExpenseReportStatus;
 import com.aafkir.tifssi.expenses.infrastructure.repository.ExpenseRepository;
 import com.aafkir.tifssi.projects.domain.enums.MissionStatus;
 import com.aafkir.tifssi.projects.domain.enums.ProjectStatus;
@@ -58,6 +60,8 @@ class InvoiceControllerIntegrationTest extends AbstractPostgreSqlIntegrationTest
     @Autowired
     private ExpenseRepository expenseRepository;
     @Autowired
+    private com.aafkir.tifssi.expenses.infrastructure.repository.ExpenseReportRepository expenseReportRepository;
+    @Autowired
     private MissionRepository missionRepository;
     @Autowired
     private ProjectRepository projectRepository;
@@ -66,12 +70,17 @@ class InvoiceControllerIntegrationTest extends AbstractPostgreSqlIntegrationTest
     @Autowired
     private CompanyRepository companyRepository;
 
+    @Autowired
+    private com.aafkir.tifssi.timesheets.infrastructure.repository.TimesheetRepository timesheetRepository;
+
     @AfterEach
     void cleanUp() {
         invoiceLineRepository.deleteAllInBatch();
         invoiceRepository.deleteAllInBatch();
         timeEntryRepository.deleteAllInBatch();
+        timesheetRepository.deleteAllInBatch();
         expenseRepository.deleteAllInBatch();
+        expenseReportRepository.deleteAllInBatch();
         missionRepository.deleteAllInBatch();
         projectRepository.deleteAllInBatch();
         profileRepository.deleteAllInBatch();
@@ -203,7 +212,13 @@ class InvoiceControllerIntegrationTest extends AbstractPostgreSqlIntegrationTest
         timeEntry.setWorkDate(LocalDate.of(2026, 7, 2));
         timeEntry.setQuantity(new BigDecimal("2.00"));
         timeEntry.setUnitType(TimeEntryUnitType.DAY);
-        timeEntry.setStatus(TimeEntryStatus.VALIDATED);
+        timeEntry.setStatus(TimeEntryStatus.DRAFT);
+        var sheet = new com.aafkir.tifssi.timesheets.domain.model.Timesheet();
+        sheet.setProfile(profile);
+        sheet.setYear(2026);
+        sheet.setMonth(7);
+        sheet.setStatus(com.aafkir.tifssi.timesheets.domain.enums.TimesheetStatus.VALIDATED);
+        timeEntry.setTimesheet(timesheetRepository.save(sheet));
         timeEntryRepository.save(timeEntry);
 
         Expense expense = new Expense();
@@ -214,7 +229,13 @@ class InvoiceControllerIntegrationTest extends AbstractPostgreSqlIntegrationTest
         expense.setAmount(new BigDecimal("150.00"));
         expense.setCurrency("EUR");
         expense.setBillable(true);
-        expense.setStatus(ExpenseStatus.VALIDATED);
+        expense.setStatus(ExpenseStatus.DRAFT);
+        ExpenseReport report = new ExpenseReport();
+        report.setProfile(profile);
+        report.setYear(2026);
+        report.setMonth(7);
+        report.setStatus(ExpenseReportStatus.VALIDATED);
+        expense.setExpenseReport(expenseReportRepository.save(report));
         expenseRepository.save(expense);
 
         return new TestData(project);

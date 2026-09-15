@@ -36,7 +36,10 @@ import com.aafkir.tifssi.projects.infrastructure.repository.ProjectRepository;
 import com.aafkir.tifssi.expenses.domain.enums.ExpenseCategory;
 import com.aafkir.tifssi.expenses.domain.enums.ExpenseStatus;
 import com.aafkir.tifssi.expenses.domain.model.Expense;
+import com.aafkir.tifssi.expenses.domain.model.ExpenseReport;
+import com.aafkir.tifssi.expenses.domain.enums.ExpenseReportStatus;
 import com.aafkir.tifssi.expenses.infrastructure.repository.ExpenseRepository;
+import com.aafkir.tifssi.expenses.infrastructure.repository.ExpenseReportRepository;
 import com.aafkir.tifssi.staffing.api.dto.request.NeedCreateRequest;
 import com.aafkir.tifssi.staffing.api.dto.request.ProfileCreateRequest;
 import com.aafkir.tifssi.staffing.api.dto.response.NeedResponse;
@@ -100,6 +103,7 @@ public class CompanyDevDataRunner implements ApplicationRunner {
     private final TimeEntryRepository timeEntryRepository;
     private final TimesheetRepository timesheetRepository;
     private final ExpenseRepository expenseRepository;
+    private final ExpenseReportRepository expenseReportRepository;
     private final InvoiceRepository invoiceRepository;
     private final AbsenceRepository absenceRepository;
     private final CompanyService companyService;
@@ -123,6 +127,7 @@ public class CompanyDevDataRunner implements ApplicationRunner {
             TimeEntryRepository timeEntryRepository,
             TimesheetRepository timesheetRepository,
             ExpenseRepository expenseRepository,
+            ExpenseReportRepository expenseReportRepository,
             InvoiceRepository invoiceRepository,
             AbsenceRepository absenceRepository,
             CompanyService companyService,
@@ -145,6 +150,7 @@ public class CompanyDevDataRunner implements ApplicationRunner {
         this.timeEntryRepository = timeEntryRepository;
         this.timesheetRepository = timesheetRepository;
         this.expenseRepository = expenseRepository;
+        this.expenseReportRepository = expenseReportRepository;
         this.invoiceRepository = invoiceRepository;
         this.absenceRepository = absenceRepository;
         this.companyService = companyService;
@@ -290,7 +296,9 @@ public class CompanyDevDataRunner implements ApplicationRunner {
 
         seedTimeEntries(ninaKyc, hugoKyc, saraRisk, clairePortal, omarDevops, mehdiBi);
         seedTimesheets();
+        seedMonthlyWorkflow(ninaKyc, hugoKyc, saraRisk, clairePortal);
         seedExpenses(ninaKyc, hugoKyc, saraRisk, clairePortal, omarDevops, mehdiBi);
+        seedExpenseReports();
         seedInvoices(kycProject, riskProject, portalProject, devopsProject, biProject, retailProject);
         seedAbsences(nina, hugo, sara, omar, claire, mehdi);
     }
@@ -305,7 +313,9 @@ public class CompanyDevDataRunner implements ApplicationRunner {
 
         seedTimeEntries(ninaKyc, hugoKyc, saraRisk, clairePortal, omarDevops, mehdiBi);
         seedTimesheets();
+        seedMonthlyWorkflow(ninaKyc, hugoKyc, saraRisk, clairePortal);
         seedExpenses(ninaKyc, hugoKyc, saraRisk, clairePortal, omarDevops, mehdiBi);
+        seedExpenseReports();
         seedInvoices(
                 existingProject("PRJ-2026-101"),
                 existingProject("PRJ-2026-102"),
@@ -482,48 +492,48 @@ public class CompanyDevDataRunner implements ApplicationRunner {
 
     private void seedTimeEntries(MissionResponse... missions) {
         List<TimeEntrySeed> seeds = List.of(
-                new TimeEntrySeed(missions[0], LocalDate.of(2026, 8, 3), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.VALIDATED, "Developpement API"),
-                new TimeEntrySeed(missions[0], LocalDate.of(2026, 8, 4), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.VALIDATED, "Correction anomalies"),
-                new TimeEntrySeed(missions[0], LocalDate.of(2026, 8, 5), "0.50", TimeEntryUnitType.HALF_DAY, TimeEntryStatus.VALIDATED, "Revue architecture"),
-                new TimeEntrySeed(missions[0], LocalDate.of(2026, 8, 6), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.VALIDATED, "Tests et recette"),
-                new TimeEntrySeed(missions[0], LocalDate.of(2026, 8, 7), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.VALIDATED, "Developpement API"),
+                new TimeEntrySeed(missions[0], LocalDate.of(2026, 8, 3), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Developpement API"),
+                new TimeEntrySeed(missions[0], LocalDate.of(2026, 8, 4), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Correction anomalies"),
+                new TimeEntrySeed(missions[0], LocalDate.of(2026, 8, 5), "0.50", TimeEntryUnitType.HALF_DAY, TimeEntryStatus.DRAFT, "Revue architecture"),
+                new TimeEntrySeed(missions[0], LocalDate.of(2026, 8, 6), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Tests et recette"),
+                new TimeEntrySeed(missions[0], LocalDate.of(2026, 8, 7), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Developpement API"),
                 new TimeEntrySeed(missions[0], LocalDate.of(2026, 9, 1), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Cadrage fonctionnel"),
                 new TimeEntrySeed(missions[0], LocalDate.of(2026, 9, 2), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Developpement API"),
                 new TimeEntrySeed(missions[0], LocalDate.of(2026, 9, 4), "0.50", TimeEntryUnitType.HALF_DAY, TimeEntryStatus.DRAFT, "Atelier client"),
-                new TimeEntrySeed(missions[1], LocalDate.of(2026, 8, 3), "0.50", TimeEntryUnitType.DAY, TimeEntryStatus.VALIDATED, "Preparation comite projet"),
-                new TimeEntrySeed(missions[1], LocalDate.of(2026, 8, 4), "0.50", TimeEntryUnitType.DAY, TimeEntryStatus.VALIDATED, "Atelier client"),
-                new TimeEntrySeed(missions[1], LocalDate.of(2026, 8, 5), "0.50", TimeEntryUnitType.DAY, TimeEntryStatus.VALIDATED, "Cadrage fonctionnel"),
+                new TimeEntrySeed(missions[1], LocalDate.of(2026, 8, 3), "0.50", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Preparation comite projet"),
+                new TimeEntrySeed(missions[1], LocalDate.of(2026, 8, 4), "0.50", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Atelier client"),
+                new TimeEntrySeed(missions[1], LocalDate.of(2026, 8, 5), "0.50", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Cadrage fonctionnel"),
                 new TimeEntrySeed(missions[1], LocalDate.of(2026, 9, 1), "0.50", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Suivi planning"),
                 new TimeEntrySeed(missions[1], LocalDate.of(2026, 9, 3), "0.50", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Preparation comite projet"),
                 new TimeEntrySeed(missions[2], LocalDate.of(2026, 8, 10), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Revue architecture"),
                 new TimeEntrySeed(missions[2], LocalDate.of(2026, 8, 11), "0.50", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Atelier client"),
-                new TimeEntrySeed(missions[2], LocalDate.of(2026, 8, 12), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.VALIDATED, "Cadrage fonctionnel"),
+                new TimeEntrySeed(missions[2], LocalDate.of(2026, 8, 12), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Cadrage fonctionnel"),
                 new TimeEntrySeed(missions[2], LocalDate.of(2026, 9, 7), "0.50", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Correction anomalies"),
                 new TimeEntrySeed(missions[2], LocalDate.of(2026, 9, 8), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Revue architecture"),
-                new TimeEntrySeed(missions[3], LocalDate.of(2026, 8, 17), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.VALIDATED, "Cadrage fonctionnel"),
-                new TimeEntrySeed(missions[3], LocalDate.of(2026, 8, 18), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.VALIDATED, "Atelier client"),
+                new TimeEntrySeed(missions[3], LocalDate.of(2026, 8, 17), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Cadrage fonctionnel"),
+                new TimeEntrySeed(missions[3], LocalDate.of(2026, 8, 18), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Atelier client"),
                 new TimeEntrySeed(missions[3], LocalDate.of(2026, 8, 20), "0.50", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Tests et recette"),
                 new TimeEntrySeed(missions[3], LocalDate.of(2026, 9, 1), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Cadrage fonctionnel"),
                 new TimeEntrySeed(missions[3], LocalDate.of(2026, 9, 2), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Tests et recette"),
                 new TimeEntrySeed(missions[3], LocalDate.of(2026, 9, 3), "0.50", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Correction anomalies"),
-                new TimeEntrySeed(missions[4], LocalDate.of(2026, 8, 3), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.VALIDATED, "Tests et recette"),
-                new TimeEntrySeed(missions[4], LocalDate.of(2026, 8, 4), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.VALIDATED, "Correction anomalies"),
-                new TimeEntrySeed(missions[4], LocalDate.of(2026, 8, 5), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.VALIDATED, "Developpement API"),
-                new TimeEntrySeed(missions[4], LocalDate.of(2026, 8, 6), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.VALIDATED, "Revue architecture"),
-                new TimeEntrySeed(missions[4], LocalDate.of(2026, 8, 7), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.VALIDATED, "Preparation comite projet"),
+                new TimeEntrySeed(missions[4], LocalDate.of(2026, 8, 3), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Tests et recette"),
+                new TimeEntrySeed(missions[4], LocalDate.of(2026, 8, 4), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Correction anomalies"),
+                new TimeEntrySeed(missions[4], LocalDate.of(2026, 8, 5), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Developpement API"),
+                new TimeEntrySeed(missions[4], LocalDate.of(2026, 8, 6), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Revue architecture"),
+                new TimeEntrySeed(missions[4], LocalDate.of(2026, 8, 7), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Preparation comite projet"),
                 new TimeEntrySeed(missions[4], LocalDate.of(2026, 9, 7), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Tests et recette"),
                 new TimeEntrySeed(missions[4], LocalDate.of(2026, 9, 9), "0.50", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Correction anomalies"),
-                new TimeEntrySeed(missions[5], LocalDate.of(2026, 8, 24), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.VALIDATED, "Developpement API"),
-                new TimeEntrySeed(missions[5], LocalDate.of(2026, 8, 25), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.VALIDATED, "Tests et recette"),
-                new TimeEntrySeed(missions[5], LocalDate.of(2026, 8, 26), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.VALIDATED, "Correction anomalies"),
-                new TimeEntrySeed(missions[5], LocalDate.of(2026, 8, 27), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.VALIDATED, "Atelier client"),
-                new TimeEntrySeed(missions[5], LocalDate.of(2026, 8, 28), "0.50", TimeEntryUnitType.DAY, TimeEntryStatus.VALIDATED, "Preparation comite projet"),
+                new TimeEntrySeed(missions[5], LocalDate.of(2026, 8, 24), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Developpement API"),
+                new TimeEntrySeed(missions[5], LocalDate.of(2026, 8, 25), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Tests et recette"),
+                new TimeEntrySeed(missions[5], LocalDate.of(2026, 8, 26), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Correction anomalies"),
+                new TimeEntrySeed(missions[5], LocalDate.of(2026, 8, 27), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Atelier client"),
+                new TimeEntrySeed(missions[5], LocalDate.of(2026, 8, 28), "0.50", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Preparation comite projet"),
                 new TimeEntrySeed(missions[5], LocalDate.of(2026, 9, 1), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Developpement API"),
                 new TimeEntrySeed(missions[5], LocalDate.of(2026, 9, 2), "0.50", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Tests et recette"),
                 new TimeEntrySeed(missions[5], LocalDate.of(2026, 9, 4), "1.00", TimeEntryUnitType.DAY, TimeEntryStatus.DRAFT, "Correction anomalies"),
                 new TimeEntrySeed(missions[0], LocalDate.of(2026, 9, 7), "8.00", TimeEntryUnitType.HOUR, TimeEntryStatus.DRAFT, "Developpement API"),
                 new TimeEntrySeed(missions[2], LocalDate.of(2026, 9, 9), "4.00", TimeEntryUnitType.HOUR, TimeEntryStatus.DRAFT, "Atelier client"),
-                new TimeEntrySeed(missions[4], LocalDate.of(2026, 9, 10), "8.00", TimeEntryUnitType.HOUR, TimeEntryStatus.VALIDATED, "Tests et recette")
+                new TimeEntrySeed(missions[4], LocalDate.of(2026, 9, 10), "8.00", TimeEntryUnitType.HOUR, TimeEntryStatus.DRAFT, "Tests et recette")
         );
 
         seeds.forEach(this::createTimeEntry);
@@ -547,7 +557,39 @@ public class CompanyDevDataRunner implements ApplicationRunner {
         timeEntry.setUnitType(seed.unitType());
         timeEntry.setStatus(seed.status());
         timeEntry.setComment(seed.comment());
+        Timesheet sheet = timesheetRepository.findByProfileIdAndYearAndMonth(seed.mission().profileId(), seed.workDate().getYear(), seed.workDate().getMonthValue()).orElseGet(() -> {
+            Timesheet created = new Timesheet();
+            created.setProfile(timeEntry.getProfile());
+            created.setYear(seed.workDate().getYear());
+            created.setMonth(seed.workDate().getMonthValue());
+            return timesheetRepository.save(created);
+        });
+        timeEntry.setTimesheet(sheet);
         timeEntryRepository.save(timeEntry);
+    }
+
+    private void seedMonthlyWorkflow(MissionResponse... missions) {
+        TimesheetStatus[] statuses = {TimesheetStatus.DRAFT, TimesheetStatus.SUBMITTED, TimesheetStatus.VALIDATED, TimesheetStatus.REJECTED};
+        for (int i = 0; i < statuses.length; i++) {
+            MissionResponse mission = missions[i];
+            if (timesheetRepository.findByProfileIdAndYearAndMonth(mission.profileId(), 2026, 7).isPresent()) continue;
+            Timesheet sheet = new Timesheet();
+            sheet.setProfile(profileRepository.getReferenceById(mission.profileId()));
+            sheet.setYear(2026);
+            sheet.setMonth(7);
+            sheet.setStatus(statuses[i]);
+            if (statuses[i] != TimesheetStatus.DRAFT) sheet.setSubmittedAt(java.time.Instant.parse("2026-07-31T17:00:00Z"));
+            if (statuses[i] == TimesheetStatus.VALIDATED) sheet.setValidatedAt(java.time.Instant.parse("2026-08-01T09:00:00Z"));
+            if (statuses[i] == TimesheetStatus.REJECTED) {
+                sheet.setRejectedAt(java.time.Instant.parse("2026-08-01T09:00:00Z"));
+                sheet.setRejectionReason("Merci de compléter la journée du 21 juillet.");
+            }
+            timesheetRepository.save(sheet);
+            for (int day : new int[]{20, 21}) {
+                createTimeEntry(new TimeEntrySeed(mission, LocalDate.of(2026, 7, day), "1.00", TimeEntryUnitType.DAY,
+                        TimeEntryStatus.DRAFT, "CRA mensuel DEV - saisie journalière"));
+            }
+        }
     }
 
     private void seedTimesheets() {
@@ -558,7 +600,7 @@ public class CompanyDevDataRunner implements ApplicationRunner {
                         Timesheet created = new Timesheet();
                         created.setProfile(profileRepository.getReferenceById(key.getKey()));
                         created.setYear(key.getValue().getYear()); created.setMonth(key.getValue().getMonthValue());
-                        created.setStatus(entries.stream().allMatch(e -> e.getStatus() == TimeEntryStatus.VALIDATED) ? TimesheetStatus.VALIDATED : TimesheetStatus.DRAFT);
+                        created.setStatus(TimesheetStatus.DRAFT);
                         if (created.getStatus() == TimesheetStatus.VALIDATED) created.setValidatedAt(java.time.Instant.now());
                         return timesheetRepository.save(created);
                     });
@@ -568,8 +610,8 @@ public class CompanyDevDataRunner implements ApplicationRunner {
 
     private void seedExpenses(MissionResponse... missions) {
         List<ExpenseSeed> seeds = List.of(
-                new ExpenseSeed(missions[0], LocalDate.of(2026, 8, 5), ExpenseCategory.TRAVEL, "128.40", true, ExpenseStatus.VALIDATED, "Train aller-retour"),
-                new ExpenseSeed(missions[0], LocalDate.of(2026, 8, 6), ExpenseCategory.MEAL, "32.50", true, ExpenseStatus.VALIDATED, "Repas client"),
+                new ExpenseSeed(missions[0], LocalDate.of(2026, 8, 5), ExpenseCategory.TRAVEL, "128.40", true, ExpenseStatus.DRAFT, "Train aller-retour"),
+                new ExpenseSeed(missions[0], LocalDate.of(2026, 8, 6), ExpenseCategory.MEAL, "32.50", true, ExpenseStatus.DRAFT, "Repas client"),
                 new ExpenseSeed(missions[0], LocalDate.of(2026, 9, 2), ExpenseCategory.TRAVEL, "46.00", false, ExpenseStatus.DRAFT, "Taxi gare client"),
                 new ExpenseSeed(missions[1], LocalDate.of(2026, 8, 4), ExpenseCategory.MEAL, "28.90", true, ExpenseStatus.VALIDATED, "Dejeuner atelier client"),
                 new ExpenseSeed(missions[1], LocalDate.of(2026, 9, 3), ExpenseCategory.OTHER, "18.00", false, ExpenseStatus.DRAFT, "Parking comite projet"),
@@ -611,9 +653,33 @@ public class CompanyDevDataRunner implements ApplicationRunner {
         expense.setAmount(new BigDecimal(seed.amount()));
         expense.setCurrency("EUR");
         expense.setBillable(seed.billable());
-        expense.setStatus(seed.status());
+        expense.setStatus(ExpenseStatus.DRAFT);
         expense.setComment(seed.comment());
+        ExpenseReport report = expenseReportRepository.findByProfileIdAndYearAndMonth(
+                        seed.mission().profileId(), seed.expenseDate().getYear(), seed.expenseDate().getMonthValue())
+                .orElseGet(() -> {
+                    ExpenseReport created = new ExpenseReport();
+                    created.setProfile(profileRepository.getReferenceById(seed.mission().profileId()));
+                    created.setYear(seed.expenseDate().getYear());
+                    created.setMonth(seed.expenseDate().getMonthValue());
+                    return expenseReportRepository.save(created);
+                });
+        expense.setExpenseReport(report);
         expenseRepository.save(expense);
+    }
+
+    private void seedExpenseReports() {
+        expenseReportRepository.findAll().forEach(report -> {
+            String email = report.getProfile().getEmailAddress();
+            if (email.startsWith("nina.")) report.setStatus(ExpenseReportStatus.DRAFT);
+            else if (email.startsWith("hugo.")) report.setStatus(ExpenseReportStatus.SUBMITTED);
+            else if (email.startsWith("sara.")) report.setStatus(ExpenseReportStatus.VALIDATED);
+            else if (email.startsWith("claire.")) {
+                report.setStatus(ExpenseReportStatus.REJECTED);
+                report.setRejectionReason("Merci de joindre le justificatif manquant.");
+            }
+            expenseReportRepository.save(report);
+        });
     }
 
     private void seedInvoices(ProjectResponse... projects) {

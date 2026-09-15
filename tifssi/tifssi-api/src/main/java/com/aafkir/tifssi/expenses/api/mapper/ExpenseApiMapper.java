@@ -20,6 +20,7 @@ public interface ExpenseApiMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "mission", ignore = true)
     @Mapping(target = "profile", ignore = true)
+    @Mapping(target = "expenseReport", ignore = true)
     Expense toEntity(ExpenseCreateRequest request);
 
     @Mapping(target = "missionId", source = "mission.id")

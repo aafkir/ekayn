@@ -13,6 +13,7 @@ import com.aafkir.tifssi.timesheets.api.dto.response.TimeEntryResponse;
 import com.aafkir.tifssi.timesheets.api.dto.response.TimeEntrySummaryResponse;
 import com.aafkir.tifssi.timesheets.api.mapper.TimeEntryApiMapper;
 import com.aafkir.tifssi.timesheets.domain.enums.TimeEntryUnitType;
+import com.aafkir.tifssi.timesheets.domain.enums.TimeEntryStatus;
 import com.aafkir.tifssi.timesheets.domain.model.TimeEntry;
 import com.aafkir.tifssi.timesheets.infrastructure.repository.TimeEntryRepository;
 import java.math.BigDecimal;
@@ -33,34 +34,46 @@ public class TimeEntryService {
     private final ProfileService profileService;
     private final TimeEntryApiMapper timeEntryApiMapper;
     private final EntityValidationService entityValidationService;
+    private final TimesheetService timesheets;
 
     public TimeEntryService(
             TimeEntryRepository timeEntryRepository,
             MissionService missionService,
             ProfileService profileService,
             TimeEntryApiMapper timeEntryApiMapper,
-            EntityValidationService entityValidationService
+            EntityValidationService entityValidationService,
+            TimesheetService timesheets
     ) {
         this.timeEntryRepository = timeEntryRepository;
         this.missionService = missionService;
         this.profileService = profileService;
         this.timeEntryApiMapper = timeEntryApiMapper;
         this.entityValidationService = entityValidationService;
+        this.timesheets = timesheets;
     }
 
     public TimeEntryResponse create(TimeEntryCreateRequest request) {
+        rejectIndividualValidation(request.status());
         TimeEntry timeEntry = timeEntryApiMapper.toEntity(request);
+        timeEntry.setStatus(TimeEntryStatus.DRAFT);
         timeEntry.setMission(missionService.getMission(request.missionId()));
         timeEntry.setProfile(profileService.getProfile(request.profileId()));
         timeEntry.setComment(normalizeComment(request.comment()));
 
         validateTimeEntryRelations(timeEntry);
+        var sheet = timesheets.editableFor(timeEntry.getProfile(), timeEntry.getWorkDate());
+        if (timeEntry.getTimesheet() != null && timeEntry.getTimesheet() != sheet) {
+            timeEntry.getTimesheet().getTimeEntries().remove(timeEntry);
+        }
+        timeEntry.setTimesheet(sheet);
         entityValidationService.validate(timeEntry);
+        if (!sheet.getTimeEntries().contains(timeEntry)) sheet.getTimeEntries().add(timeEntry);
         return timeEntryApiMapper.toResponse(timeEntryRepository.save(timeEntry));
     }
 
     public TimeEntryResponse patch(Long id, TimeEntryPatchRequest request) {
         TimeEntry timeEntry = getTimeEntry(id);
+        timesheets.requireEditable(timeEntry.getTimesheet());
 
         if (JsonNullableUtils.isDefined(request.getMissionId())) {
             Long missionId = JsonNullableUtils.unwrap(request.getMissionId());
@@ -85,16 +98,26 @@ public class TimeEntryService {
             timeEntry.setComment(normalizeComment(JsonNullableUtils.unwrap(request.getComment())));
         }
         if (JsonNullableUtils.isDefined(request.getStatus())) {
-            timeEntry.setStatus(JsonNullableUtils.unwrap(request.getStatus()));
+            rejectIndividualValidation(JsonNullableUtils.unwrap(request.getStatus()));
         }
 
         validateTimeEntryRelations(timeEntry);
         entityValidationService.validate(timeEntry);
+        var sheet = timesheets.editableFor(timeEntry.getProfile(), timeEntry.getWorkDate());
+        if (timeEntry.getTimesheet() != null && timeEntry.getTimesheet() != sheet) {
+            timeEntry.getTimesheet().getTimeEntries().remove(timeEntry);
+        }
+        timeEntry.setTimesheet(sheet);
+        entityValidationService.validate(timeEntry);
+        if (!sheet.getTimeEntries().contains(timeEntry)) sheet.getTimeEntries().add(timeEntry);
         return timeEntryApiMapper.toResponse(timeEntryRepository.save(timeEntry));
     }
 
     public void delete(Long id) {
-        timeEntryRepository.delete(getTimeEntry(id));
+        TimeEntry entry = getTimeEntry(id);
+        timesheets.requireEditable(entry.getTimesheet());
+        entry.getTimesheet().getTimeEntries().remove(entry);
+        timeEntryRepository.delete(entry);
     }
 
     @Transactional(readOnly = true)
@@ -153,6 +176,12 @@ public class TimeEntryService {
                 .orElseThrow(() -> new ResourceNotFoundException("TimeEntry", id));
     }
 
+    private void rejectIndividualValidation(TimeEntryStatus status) {
+        if (status != null && status != TimeEntryStatus.DRAFT) {
+            throw new IllegalArgumentException("Individual TimeEntry validation is not supported. Submit and validate the monthly Timesheet.");
+        }
+    }
+
     private void validateTimeEntryRelations(TimeEntry timeEntry) {
         if (timeEntry.getMission() == null) {
             throw new IllegalArgumentException("missionId cannot be null.");
@@ -166,7 +195,7 @@ public class TimeEntryService {
 
         LocalDate workDate = timeEntry.getWorkDate();
         if (workDate == null) {
-            return;
+            throw new IllegalArgumentException("workDate cannot be null.");
         }
 
         if (timeEntry.getMission().getStartDate() != null && workDate.isBefore(timeEntry.getMission().getStartDate())) {

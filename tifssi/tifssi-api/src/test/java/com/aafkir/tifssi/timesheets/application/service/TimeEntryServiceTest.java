@@ -56,6 +56,9 @@ class TimeEntryServiceTest {
     @Mock
     private EntityValidationService entityValidationService;
 
+    @Mock
+    private TimesheetService timesheets;
+
     @InjectMocks
     private TimeEntryService timeEntryService;
 
@@ -112,6 +115,7 @@ class TimeEntryServiceTest {
         when(missionService.getMission(1L)).thenReturn(mission);
         when(profileService.getProfile(2L)).thenReturn(profile);
         when(timeEntryApiMapper.toEntity(request)).thenReturn(mappedTimeEntry);
+        when(timesheets.editableFor(any(), any())).thenReturn(new com.aafkir.tifssi.timesheets.domain.model.Timesheet());
         when(timeEntryRepository.save(any(TimeEntry.class))).thenAnswer(invocation -> {
             TimeEntry timeEntry = invocation.getArgument(0);
             timeEntry.setId(99L);
@@ -188,9 +192,10 @@ class TimeEntryServiceTest {
         request.setQuantity(JsonNullable.of(new BigDecimal("0.50")));
         request.setUnitType(JsonNullable.of(TimeEntryUnitType.HALF_DAY));
         request.setComment(JsonNullable.of("  Updated note "));
-        request.setStatus(JsonNullable.of(TimeEntryStatus.VALIDATED));
+        request.setStatus(JsonNullable.of(TimeEntryStatus.DRAFT));
 
         when(timeEntryRepository.findById(5L)).thenReturn(Optional.of(timeEntry));
+        when(timesheets.editableFor(any(), any())).thenReturn(new com.aafkir.tifssi.timesheets.domain.model.Timesheet());
         when(timeEntryRepository.save(any(TimeEntry.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(timeEntryApiMapper.toResponse(any(TimeEntry.class))).thenAnswer(invocation -> toResponse(invocation.getArgument(0)));
 
@@ -199,7 +204,7 @@ class TimeEntryServiceTest {
         assertThat(response.quantity()).isEqualByComparingTo("0.50");
         assertThat(response.unitType()).isEqualTo(TimeEntryUnitType.HALF_DAY);
         assertThat(response.comment()).isEqualTo("Updated note");
-        assertThat(response.status()).isEqualTo(TimeEntryStatus.VALIDATED);
+        assertThat(response.status()).isEqualTo(TimeEntryStatus.DRAFT);
     }
 
     @Test

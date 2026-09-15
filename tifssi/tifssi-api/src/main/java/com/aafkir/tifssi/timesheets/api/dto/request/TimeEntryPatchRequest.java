@@ -19,8 +19,7 @@ import org.openapitools.jackson.nullable.JsonNullable;
                 {
                   "quantity": 0.50,
                   "unitType": "HALF_DAY",
-                  "comment": "Updated after review",
-                  "status": "VALIDATED"
+                  "comment": "Updated after review"
                 }
                 """
 )
@@ -32,5 +31,6 @@ public class TimeEntryPatchRequest {
     private JsonNullable<BigDecimal> quantity = JsonNullable.undefined();
     private JsonNullable<TimeEntryUnitType> unitType = JsonNullable.undefined();
     private JsonNullable<String> comment = JsonNullable.undefined();
+    @Schema(deprecated = true, description = "Compatibilité uniquement : DRAFT est accepté sans transition. Utiliser le workflow Timesheet pour valider le CRA.")
     private JsonNullable<TimeEntryStatus> status = JsonNullable.undefined();
 }

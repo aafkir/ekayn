@@ -37,23 +37,30 @@ public class ExpenseService {
     private final ProfileService profileService;
     private final ExpenseApiMapper expenseApiMapper;
     private final EntityValidationService entityValidationService;
+    private final ExpenseReportService expenseReports;
 
     public ExpenseService(
             ExpenseRepository expenseRepository,
             MissionService missionService,
             ProfileService profileService,
             ExpenseApiMapper expenseApiMapper,
-            EntityValidationService entityValidationService
+            EntityValidationService entityValidationService,
+            ExpenseReportService expenseReports
     ) {
         this.expenseRepository = expenseRepository;
         this.missionService = missionService;
         this.profileService = profileService;
         this.expenseApiMapper = expenseApiMapper;
         this.entityValidationService = entityValidationService;
+        this.expenseReports = expenseReports;
     }
 
     public ExpenseResponse create(ExpenseCreateRequest request) {
         Expense expense = expenseApiMapper.toEntity(request);
+        if (request.status() != null && request.status() != com.aafkir.tifssi.expenses.domain.enums.ExpenseStatus.DRAFT) {
+            throw new IllegalArgumentException("Individual Expense validation is not supported. Submit the monthly ExpenseReport.");
+        }
+        expense.setStatus(com.aafkir.tifssi.expenses.domain.enums.ExpenseStatus.DRAFT);
         expense.setMission(missionService.getMission(request.missionId()));
         expense.setProfile(profileService.getProfile(request.profileId()));
         expense.setCurrency(normalizeCurrency(request.currency()));
@@ -61,12 +68,15 @@ public class ExpenseService {
         expense.setReceiptUrl(normalizeReceiptUrl(request.receiptUrl()));
 
         validateExpenseRelations(expense);
+        var report = expenseReports.editable(expense.getProfile(), expense.getExpenseDate());
+        expense.setExpenseReport(report);
         entityValidationService.validate(expense);
         return expenseApiMapper.toResponse(expenseRepository.save(expense));
     }
 
     public ExpenseResponse patch(Long id, ExpensePatchRequest request) {
         Expense expense = getExpense(id);
+        expenseReports.requireEditable(expense.getExpenseReport());
 
         if (JsonNullableUtils.isDefined(request.getMissionId())) {
             Long missionId = JsonNullableUtils.unwrap(request.getMissionId());
@@ -97,7 +107,11 @@ public class ExpenseService {
             expense.setReceiptUrl(normalizeReceiptUrl(JsonNullableUtils.unwrap(request.getReceiptUrl())));
         }
         if (JsonNullableUtils.isDefined(request.getStatus())) {
-            expense.setStatus(JsonNullableUtils.unwrap(request.getStatus()));
+            var status = JsonNullableUtils.unwrap(request.getStatus());
+            if (status != null && status != com.aafkir.tifssi.expenses.domain.enums.ExpenseStatus.DRAFT) {
+                throw new IllegalArgumentException("Individual Expense validation is not supported. Submit the monthly ExpenseReport.");
+            }
+            expense.setStatus(com.aafkir.tifssi.expenses.domain.enums.ExpenseStatus.DRAFT);
         }
         if (JsonNullableUtils.isDefined(request.getBillable())) {
             Boolean billable = JsonNullableUtils.unwrap(request.getBillable());
@@ -108,12 +122,16 @@ public class ExpenseService {
         }
 
         validateExpenseRelations(expense);
+        var report = expenseReports.editable(expense.getProfile(), expense.getExpenseDate());
+        expense.setExpenseReport(report);
         entityValidationService.validate(expense);
         return expenseApiMapper.toResponse(expenseRepository.save(expense));
     }
 
     public void delete(Long id) {
-        expenseRepository.delete(getExpense(id));
+        Expense expense = getExpense(id);
+        expenseReports.requireEditable(expense.getExpenseReport());
+        expenseRepository.delete(expense);
     }
 
     @Transactional(readOnly = true)

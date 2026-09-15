@@ -388,3 +388,7 @@ Exemple de reponse d'erreur de validation :
   ]
 }
 ```
+
+## CRA mensuels
+
+Le workflow consultant/manager est documenté dans [docs/timesheet-workflow.md](docs/timesheet-workflow.md).

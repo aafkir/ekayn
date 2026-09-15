@@ -51,9 +51,13 @@ class TimeEntryControllerIntegrationTest extends AbstractPostgreSqlIntegrationTe
     @Autowired
     private CompanyRepository companyRepository;
 
+    @Autowired
+    private com.aafkir.tifssi.timesheets.infrastructure.repository.TimesheetRepository timesheetRepository;
+
     @AfterEach
     void cleanUp() {
         timeEntryRepository.deleteAllInBatch();
+        timesheetRepository.deleteAllInBatch();
         missionRepository.deleteAllInBatch();
         projectRepository.deleteAllInBatch();
         profileRepository.deleteAllInBatch();
@@ -107,14 +111,14 @@ class TimeEntryControllerIntegrationTest extends AbstractPostgreSqlIntegrationTe
                                   "quantity": 0.50,
                                   "unitType": "HALF_DAY",
                                   "comment": "Updated after review",
-                                  "status": "VALIDATED"
+                                  "status": "DRAFT"
                                 }
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.quantity").value(0.50))
                 .andExpect(jsonPath("$.unitType").value("HALF_DAY"))
                 .andExpect(jsonPath("$.comment").value("Updated after review"))
-                .andExpect(jsonPath("$.status").value("VALIDATED"));
+                .andExpect(jsonPath("$.status").value("DRAFT"));
 
         mockMvc.perform(get("/api/time-entries/summary")
                         .param("missionId", testData.mission().getId().toString())

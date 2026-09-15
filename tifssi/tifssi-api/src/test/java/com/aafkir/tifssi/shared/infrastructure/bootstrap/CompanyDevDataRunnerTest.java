@@ -20,6 +20,7 @@ import com.aafkir.tifssi.crm.infrastructure.repository.ContactRepository;
 import com.aafkir.tifssi.absences.infrastructure.repository.AbsenceRepository;
 import com.aafkir.tifssi.billing.infrastructure.repository.InvoiceRepository;
 import com.aafkir.tifssi.expenses.infrastructure.repository.ExpenseRepository;
+import com.aafkir.tifssi.expenses.infrastructure.repository.ExpenseReportRepository;
 import com.aafkir.tifssi.crm.domain.model.Company;
 import com.aafkir.tifssi.projects.domain.model.Mission;
 import com.aafkir.tifssi.projects.domain.model.Project;
@@ -82,7 +83,11 @@ class CompanyDevDataRunnerTest {
     @Mock
     private TimeEntryRepository timeEntryRepository;
     @Mock
+    private com.aafkir.tifssi.timesheets.infrastructure.repository.TimesheetRepository timesheetRepository;
+    @Mock
     private ExpenseRepository expenseRepository;
+    @Mock
+    private ExpenseReportRepository expenseReportRepository;
     @Mock
     private InvoiceRepository invoiceRepository;
     @Mock
@@ -136,7 +141,14 @@ class CompanyDevDataRunnerTest {
         companyDevDataRunner.run(new DefaultApplicationArguments(new String[0]));
 
         verifyNoInteractions(companyService, contactService, actionService, needService, profileService, projectService, missionService, skillRepository, profileSkillRepository);
-        verify(timeEntryRepository, times(42)).save(any());
+        verify(timeEntryRepository, times(50)).save(any());
+        var sheets = org.mockito.ArgumentCaptor.forClass(com.aafkir.tifssi.timesheets.domain.model.Timesheet.class);
+        verify(timesheetRepository, org.mockito.Mockito.atLeastOnce()).save(sheets.capture());
+        org.assertj.core.api.Assertions.assertThat(sheets.getAllValues()).extracting(com.aafkir.tifssi.timesheets.domain.model.Timesheet::getStatus)
+                .contains(com.aafkir.tifssi.timesheets.domain.enums.TimesheetStatus.DRAFT,
+                          com.aafkir.tifssi.timesheets.domain.enums.TimesheetStatus.SUBMITTED,
+                          com.aafkir.tifssi.timesheets.domain.enums.TimesheetStatus.VALIDATED,
+                          com.aafkir.tifssi.timesheets.domain.enums.TimesheetStatus.REJECTED);
         verify(expenseRepository, times(20)).save(any());
         verify(invoiceRepository, times(10)).save(any());
         verify(absenceRepository, times(18)).save(any());
@@ -217,7 +229,14 @@ class CompanyDevDataRunnerTest {
         verify(profileSkillRepository, times(30)).save(any());
         verify(projectService, times(6)).create(any(ProjectCreateRequest.class));
         verify(missionService, times(7)).create(any(MissionCreateRequest.class));
-        verify(timeEntryRepository, times(42)).save(any());
+        verify(timeEntryRepository, times(50)).save(any());
+        var sheets = org.mockito.ArgumentCaptor.forClass(com.aafkir.tifssi.timesheets.domain.model.Timesheet.class);
+        verify(timesheetRepository, org.mockito.Mockito.atLeastOnce()).save(sheets.capture());
+        org.assertj.core.api.Assertions.assertThat(sheets.getAllValues()).extracting(com.aafkir.tifssi.timesheets.domain.model.Timesheet::getStatus)
+                .contains(com.aafkir.tifssi.timesheets.domain.enums.TimesheetStatus.DRAFT,
+                          com.aafkir.tifssi.timesheets.domain.enums.TimesheetStatus.SUBMITTED,
+                          com.aafkir.tifssi.timesheets.domain.enums.TimesheetStatus.VALIDATED,
+                          com.aafkir.tifssi.timesheets.domain.enums.TimesheetStatus.REJECTED);
         verify(expenseRepository, times(20)).save(any());
         verify(invoiceRepository, times(10)).save(any());
         verify(absenceRepository, times(18)).save(any());

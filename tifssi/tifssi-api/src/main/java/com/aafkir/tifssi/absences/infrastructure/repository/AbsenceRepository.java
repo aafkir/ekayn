@@ -9,5 +9,7 @@ public interface AbsenceRepository extends JpaRepository<Absence, Long> {
 
     List<Absence> findAllByProfileIdOrderByStartDateAscIdAsc(Long profileId);
 
+    List<Absence> findAllByOrderByStartDateAscIdAsc();
+
     boolean existsByProfileIdAndStartDateAndEndDateAndComment(Long profileId, LocalDate startDate, LocalDate endDate, String comment);
 }

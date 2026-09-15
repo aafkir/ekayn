@@ -13,7 +13,7 @@ import com.aafkir.tifssi.billing.domain.model.Invoice;
 import com.aafkir.tifssi.billing.domain.model.InvoiceLine;
 import com.aafkir.tifssi.billing.infrastructure.repository.InvoiceLineRepository;
 import com.aafkir.tifssi.billing.infrastructure.repository.InvoiceRepository;
-import com.aafkir.tifssi.expenses.domain.enums.ExpenseStatus;
+import com.aafkir.tifssi.expenses.domain.enums.ExpenseReportStatus;
 import com.aafkir.tifssi.expenses.domain.model.Expense;
 import com.aafkir.tifssi.expenses.infrastructure.repository.ExpenseRepository;
 import com.aafkir.tifssi.projects.application.service.ProjectService;
@@ -24,7 +24,7 @@ import com.aafkir.tifssi.shared.api.error.ApiFieldError;
 import com.aafkir.tifssi.shared.application.exception.RequestValidationException;
 import com.aafkir.tifssi.shared.application.exception.ResourceNotFoundException;
 import com.aafkir.tifssi.shared.application.validation.EntityValidationService;
-import com.aafkir.tifssi.timesheets.domain.enums.TimeEntryStatus;
+import com.aafkir.tifssi.timesheets.domain.enums.TimesheetStatus;
 import com.aafkir.tifssi.timesheets.domain.enums.TimeEntryUnitType;
 import com.aafkir.tifssi.timesheets.domain.model.TimeEntry;
 import com.aafkir.tifssi.timesheets.infrastructure.repository.TimeEntryRepository;
@@ -151,14 +151,13 @@ public class InvoiceService {
         Map<Long, Mission> missionsById = missions.stream().collect(Collectors.toMap(Mission::getId, mission -> mission));
         List<Long> missionIds = missions.stream().map(Mission::getId).toList();
 
-        List<TimeEntry> timeEntries = timeEntryRepository.findAllByMissionIdInAndStatusOrderByWorkDateAscIdAsc(
+        List<TimeEntry> timeEntries = timeEntryRepository.findAllByMissionIdInAndTimesheetStatusOrderByWorkDateAscIdAsc(
                 missionIds,
-                TimeEntryStatus.VALIDATED
+                TimesheetStatus.VALIDATED
         );
-        List<Expense> expenses = expenseRepository.findAllByMissionIdInAndStatusOrderByExpenseDateAscIdAsc(
-                missionIds,
-                ExpenseStatus.VALIDATED
-        );
+        List<Expense> expenses = expenseRepository.findAllByMissionIdInAndExpenseReportStatusOrderByExpenseDateAscIdAsc(
+                missionIds, ExpenseReportStatus.VALIDATED);
+        expenses = expenses.stream().filter(Expense::isBillable).toList();
 
         validateExpenseCurrencies(expenses);
 

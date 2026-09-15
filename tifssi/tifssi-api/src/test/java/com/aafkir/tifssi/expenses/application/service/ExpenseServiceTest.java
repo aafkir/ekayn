@@ -16,6 +16,7 @@ import com.aafkir.tifssi.expenses.api.mapper.ExpenseApiMapper;
 import com.aafkir.tifssi.expenses.domain.enums.ExpenseCategory;
 import com.aafkir.tifssi.expenses.domain.enums.ExpenseStatus;
 import com.aafkir.tifssi.expenses.domain.model.Expense;
+import com.aafkir.tifssi.expenses.domain.model.ExpenseReport;
 import com.aafkir.tifssi.expenses.infrastructure.repository.ExpenseRepository;
 import com.aafkir.tifssi.projects.application.service.MissionService;
 import com.aafkir.tifssi.projects.domain.enums.MissionStatus;
@@ -52,12 +53,21 @@ class ExpenseServiceTest {
     private ExpenseApiMapper expenseApiMapper;
     @Mock
     private EntityValidationService entityValidationService;
+    @Mock
+    private ExpenseReportService expenseReports;
 
     @InjectMocks
     private ExpenseService expenseService;
 
     private Mission mission;
     private Profile profile;
+
+    @BeforeEach
+    void stubMonthlyReportWorkflow() {
+        ExpenseReport report = new ExpenseReport();
+        report.setStatus(com.aafkir.tifssi.expenses.domain.enums.ExpenseReportStatus.DRAFT);
+        org.mockito.Mockito.lenient().when(expenseReports.editable(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any())).thenReturn(report);
+    }
 
     @BeforeEach
     void setUp() {
@@ -200,7 +210,7 @@ class ExpenseServiceTest {
         request.setComment(JsonNullable.of("  Updated meal "));
         request.setReceiptUrl(JsonNullable.of(" https://cdn.example.com/meal.pdf "));
         request.setBillable(JsonNullable.of(false));
-        request.setStatus(JsonNullable.of(ExpenseStatus.VALIDATED));
+        request.setStatus(JsonNullable.of(ExpenseStatus.DRAFT));
 
         when(expenseRepository.findById(5L)).thenReturn(Optional.of(expense));
         when(expenseRepository.save(any(Expense.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -214,7 +224,7 @@ class ExpenseServiceTest {
         assertThat(response.comment()).isEqualTo("Updated meal");
         assertThat(response.receiptUrl()).isEqualTo("https://cdn.example.com/meal.pdf");
         assertThat(response.billable()).isFalse();
-        assertThat(response.status()).isEqualTo(ExpenseStatus.VALIDATED);
+        assertThat(response.status()).isEqualTo(ExpenseStatus.DRAFT);
     }
 
     @Test

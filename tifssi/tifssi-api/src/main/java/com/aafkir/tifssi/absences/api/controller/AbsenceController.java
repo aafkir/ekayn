@@ -3,6 +3,8 @@ package com.aafkir.tifssi.absences.api.controller;
 import com.aafkir.tifssi.absences.api.dto.request.AbsenceCreateRequest;
 import com.aafkir.tifssi.absences.api.dto.request.AbsencePatchRequest;
 import com.aafkir.tifssi.absences.api.dto.response.AbsenceResponse;
+import com.aafkir.tifssi.absences.domain.enums.AbsenceStatus;
+import com.aafkir.tifssi.absences.domain.enums.AbsenceType;
 import com.aafkir.tifssi.absences.api.dto.response.AbsenceSummaryResponse;
 import com.aafkir.tifssi.absences.application.service.AbsenceService;
 import com.aafkir.tifssi.shared.api.error.ApiErrorResponse;
@@ -127,12 +129,14 @@ public class AbsenceController {
     public List<AbsenceResponse> findAll(
             @Parameter(description = "Identifiant du profil pour filtrer les absences.")
             @RequestParam(required = false) Long profileId,
+            @RequestParam(required = false) AbsenceStatus status,
+            @RequestParam(required = false) AbsenceType type,
             @Parameter(description = "Date de debut de la periode de filtre.")
             @RequestParam(required = false) LocalDate startDate,
             @Parameter(description = "Date de fin de la periode de filtre.")
             @RequestParam(required = false) LocalDate endDate
     ) {
-        return absenceService.findAll(profileId, startDate, endDate);
+        return absenceService.findAll(profileId, status, type, startDate, endDate);
     }
 
     @GetMapping("/summary")

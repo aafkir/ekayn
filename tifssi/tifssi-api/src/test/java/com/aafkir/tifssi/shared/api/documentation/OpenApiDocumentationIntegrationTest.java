@@ -38,6 +38,10 @@ class OpenApiDocumentationIntegrationTest extends AbstractPostgreSqlIntegrationT
                 .andExpect(content().string(containsString("/api/needs/{needId}/submissions")))
                 .andExpect(content().string(containsString("/api/submissions/{id}/status")))
                 .andExpect(content().string(containsString("/api/time-entries/summary")))
+                .andExpect(content().string(containsString("/api/timesheets")))
+                .andExpect(content().string(containsString("/api/timesheets/{id}")))
+                .andExpect(content().string(containsString("/api/timesheets/{id}/submit")))
+                .andExpect(content().string(containsString("/api/profiles/me")))
                 .andExpect(content().string(containsString("/api/projects/{projectId}/invoices")))
                 .andExpect(content().string(containsString("Creer un profil")))
                 .andExpect(content().string(containsString("Creer une action")))
@@ -59,13 +63,32 @@ class OpenApiDocumentationIntegrationTest extends AbstractPostgreSqlIntegrationT
                         "Projects",
                         "Missions",
                         "Time Entries",
+                        "Timesheets",
                         "Expenses",
                         "Absences",
                         "Billing",
                         "Monitoring"
                 )
-                .doesNotContain("CRM", "Staffing", "Timesheets");
+                .doesNotContain("CRM", "Staffing");
         org.assertj.core.api.Assertions.assertThat(tagNames).hasSameSizeAs(tags);
+    }
+
+    @Test
+    void shouldDocumentMonthlyWorkflowAndRequiredRejectionReason() throws Exception {
+        var result = mockMvc.perform(get("/v3/api-docs")).andExpect(status().isOk()).andReturn();
+        JsonNode document = objectMapper.readTree(result.getResponse().getContentAsString());
+        for (String action : new String[]{"submit", "validate", "reject"}) {
+            var operation = document.path("paths").path("/api/timesheets/{id}/" + action).path("post");
+            org.assertj.core.api.Assertions.assertThat(operation.isMissingNode()).isFalse();
+            org.assertj.core.api.Assertions.assertThat(operation.path("description").asText()).contains("SUBMITTED");
+            org.assertj.core.api.Assertions.assertThat(operation.path("responses").has("409")).isTrue();
+        }
+        var request = document.path("components").path("schemas").path("TimesheetRejectRequest");
+        org.assertj.core.api.Assertions.assertThat(request.path("required").toString()).contains("reason");
+        org.assertj.core.api.Assertions.assertThat(request.path("properties").path("reason").path("maxLength").asInt()).isEqualTo(2000);
+        org.assertj.core.api.Assertions.assertThat(document.path("components").path("schemas").path("TimeEntryResponse")
+                .path("properties").path("status").path("deprecated").asBoolean()).isTrue();
+        java.nio.file.Files.writeString(java.nio.file.Path.of("target/openapi.json"), result.getResponse().getContentAsString());
     }
 
     @Test
