@@ -35,6 +35,12 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.NOT_FOUND, exception.getMessage(), request.getRequestURI(), List.of());
     }
 
+    @ExceptionHandler(org.springframework.security.core.AuthenticationException.class)
+    public ResponseEntity<ApiErrorResponse> handleAuthenticationException(
+            org.springframework.security.core.AuthenticationException exception, HttpServletRequest request) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, "Invalid credentials.", request.getRequestURI(), List.of());
+    }
+
     @ExceptionHandler(RequestValidationException.class)
     public ResponseEntity<ApiErrorResponse> handleRequestValidation(
             RequestValidationException exception,

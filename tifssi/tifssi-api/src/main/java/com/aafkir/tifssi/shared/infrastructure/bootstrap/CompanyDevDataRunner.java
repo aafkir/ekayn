@@ -76,10 +76,12 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.core.annotation.Order;
 
 @Component
 @Profile("dev")
 @ConditionalOnProperty(prefix = "app.demo-data", name = "enabled", havingValue = "true")
+@Order(0)
 public class CompanyDevDataRunner implements ApplicationRunner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CompanyDevDataRunner.class);

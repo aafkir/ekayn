@@ -37,6 +37,8 @@ public class OpenApiConfiguration {
                         new Tag().name("Expenses").description("Gestion des notes de frais et de leurs syntheses."),
                         new Tag().name("Absences").description("Gestion des absences collaborateurs et de leurs syntheses annuelles."),
                         new Tag().name("Billing").description("Gestion des factures projet et des lignes de facturation."),
+                        new Tag().name("Authentication").description("Connexion, session et identité courante."),
+                        new Tag().name("Users").description("Gestion des comptes utilisateurs (ADMIN)."),
                         new Tag().name("Monitoring").description("Supervision technique et etat de sante de l'application.")
                 ));
     }

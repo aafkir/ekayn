@@ -1,0 +1,47 @@
+# Authentification et gestion des utilisateurs
+
+## 1. Objectif
+
+Tifssi sépare désormais clairement :
+
+- l’identité de connexion : `UserAccount`
+- le profil métier / staffing : `Profile`
+
+Un utilisateur peut donc exister sans être lié à un profil métier.
+
+Exemples :
+
+- un `ADMIN` peut avoir un compte sans `Profile`
+- un `CONSULTANT` peut être lié à un `Profile`
+- un `MANAGER` peut également être lié à un `Profile`
+
+---
+
+# 2. Modèle utilisateur
+
+## UserAccount
+
+L’entité `UserAccount` représente un compte permettant de se connecter à Tifssi.
+
+Principes :
+
+- email unique
+- email normalisé
+- mot de passe stocké uniquement sous forme de hash BCrypt
+- rôle utilisateur
+- activation / désactivation du compte
+- association facultative à un `Profile`
+
+Relation :
+
+```text
+UserAccount
+    |
+    | 0..1
+    v
+Profile
+
+Seed DEV :
+- nina.dupont@tifssi-dev.example / NinaDev!2026
+- manager@tifssi-dev.example / ManagerDev!2026
+- admin@tifssi-dev.example / AdminDev!2026
