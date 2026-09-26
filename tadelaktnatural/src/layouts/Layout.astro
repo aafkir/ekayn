@@ -1,14 +1,19 @@
 ---
 import { site } from '../data/site';
+import { locales, ui, languagePaths, type Locale } from '../i18n/config';
 import '../styles/global.css';
-interface Props { title: string; description: string; path: string; image?: string; noindex?: boolean; schema?: Record<string, unknown>; }
-const { title, description, path, image = '/assets/1d40bda2c59faa8c.jpg', noindex = false, schema } = Astro.props;
+interface Props { title: string; description: string; path: string; image?: string; noindex?: boolean; schema?: Record<string, unknown>; locale?: Locale; equivalents?: Partial<Record<Locale, string>>; }
+const { title, description, path, image = '/assets/1d40bda2c59faa8c.jpg', noindex = false, schema, locale = 'es', equivalents = {} } = Astro.props as Props;
+const text = ui[locale];
+const langPaths = languagePaths[locale];
+const nav = [{ href: langPaths.material, label: text.material }, { href: langPaths.services, label: text.services }, { href: langPaths.projects, label: text.projects }, { href: langPaths.blog, label: text.blog }, { href: langPaths.about, label: text.about }];
+const alternatePaths = { es: equivalents.es || (locale === 'es' ? path : '/es/'), fr: equivalents.fr || (locale === 'fr' ? path : '/fr/'), en: equivalents.en || (locale === 'en' ? path : '/en/') };
 const canonical = `${site.url}${path}`;
 const organization = { '@context': 'https://schema.org', '@type': 'Organization', name: site.name, url: site.url, email: `mailto:${site.email}`, sameAs: [site.instagram] };
 const graph = schema ? { '@context': 'https://schema.org', '@graph': [organization, schema] } : organization;
 ---
 <!doctype html>
-<html lang="es">
+<html lang={locales[locale].lang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
@@ -27,26 +32,27 @@ const graph = schema ? { '@context': 'https://schema.org', '@graph': [organizati
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={`${site.url}${image}`} />
-    <link rel="icon" href="/assets/2db26d9d446d7cdc.jpg" />
-    <link rel="alternate" hreflang="es" href={canonical} />
-    <link rel="alternate" hreflang="x-default" href={canonical} />
+    <link rel="icon" href="/assets/logo/logo.png" />
+    {Object.entries(alternatePaths).map(([code, href]) => <link rel="alternate" hreflang={code} href={`${site.url}${href}`} />)}
+    <link rel="alternate" hreflang="x-default" href={`${site.url}${alternatePaths.es}`} />
     <script type="application/ld+json" set:html={JSON.stringify(graph)} />
   </head>
   <body>
-    <a class="skip-link" href="#contenido">Saltar al contenido</a>
+    <a class="skip-link" href="#contenido">{text.skip}</a>
     <header class="site-header">
-      <a class="logo" href="/es/" aria-label="Tadelakt Natural, inicio">TADELAKT <span>NATURAL</span></a>
-      <button class="menu-toggle" aria-expanded="false" aria-controls="main-nav">Menú</button>
+      <a class="logo" href={langPaths.home} aria-label={`${site.name}, ${locales[locale].label}`}><img src="/assets/logo/logo.png" alt={site.name} width="220" height="127" /></a>
+      <button class="menu-toggle" aria-expanded="false" aria-controls="main-nav">{text.menu}</button>
       <nav id="main-nav" aria-label="Navegación principal">
-        {site.nav.map((item) => <a href={item.href}>{item.label}</a>)}
-        <a class="button button-small" href="/es/contacto/">Solicitar presupuesto</a>
+        {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+        <div class="language-switcher" aria-label="Language selector">{Object.entries(locales).map(([code, item]) => <a class:list-active={code === locale} href={alternatePaths[code as Locale]} lang={item.lang} aria-current={code === locale ? 'page' : undefined}>{code.toUpperCase()}</a>)}</div>
+        <a class="button button-small" href={langPaths.contact}>{text.quote}</a>
       </nav>
     </header>
     <main id="contenido"><slot /></main>
     <footer class="site-footer">
       <div><p class="eyebrow">TADELAKT NATURAL</p><p>Revestimientos artesanales de cal y materiales naturales.</p></div>
       <div><p class="eyebrow">Contacto</p><a href={`mailto:${site.email}`}>{site.email}</a><span>{site.city}</span><a href={site.instagram} target="_blank" rel="noopener noreferrer">Instagram</a></div>
-      <div><p class="eyebrow">Explorar</p><a href="/es/servicios/">Servicios</a><a href="/es/proyectos/">Proyectos</a><a href="/es/contacto/">Contacto</a><a href="/es/aviso-legal/">Aviso legal</a><a href="/es/privacidad/">Privacidad</a><a href="/es/cookies/">Cookies</a></div>
+      <div><p class="eyebrow">{text.explore}</p><a href={langPaths.services}>{text.services}</a><a href={langPaths.projects}>{text.projects}</a><a href={langPaths.contact}>{text.contact}</a><a href={langPaths.legal}>{text.legal}</a><a href={langPaths.privacy}>{text.privacy}</a><a href={langPaths.cookies}>{text.cookies}</a></div>
       <small>© {new Date().getFullYear()} Tadelakt Natural</small>
     </footer>
     <script>

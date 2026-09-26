@@ -1,6 +1,8 @@
 # Tadelakt Natural
 
-Site statique Astro pour Tadelakt Natural. La version éditoriale espagnole est publiée sous `/es/`; les espaces `/fr/`, `/it/`, `/de/` et `/en/` sont préparés mais marqués `noindex` tant que les traductions ne sont pas relues.
+Site statique Astro pour Tadelakt Natural. L’espagnol (`/es/`) reste la langue principale ; le français (`/fr/`) et l’anglais (`/en/`) disposent maintenant de pages, URLs, contenus et métadonnées localisés. Les espaces `/it/` et `/de/` restent préparés mais `noindex` tant que leurs traductions ne sont pas relues.
+
+Le logo fourni est utilisé depuis `public/assets/logo/logo.png`, à partir de `assets/logo.png`.
 
 ## Développement
 

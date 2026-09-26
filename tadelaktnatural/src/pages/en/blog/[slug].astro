@@ -1,0 +1,5 @@
+---
+import Article from '../../../components/LocalizedArticle.astro';
+export function getStaticPaths(){return ['what-is-tadelakt-origin-properties-uses','tadelakt-bathrooms-and-showers','tadelakt-or-microcement'].map(slug=>({params:{slug},props:{locale:'en',slug}}));}
+---
+<Article {...Astro.props} />

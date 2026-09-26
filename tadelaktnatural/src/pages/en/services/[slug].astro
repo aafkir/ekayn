@@ -1,0 +1,5 @@
+---
+import Service from '../../../components/LocalizedService.astro'; import { localizedServices } from '../../../i18n/config';
+export function getStaticPaths(){ return Object.keys(localizedServices.en).map(slug=>({params:{slug},props:{locale:'en',slug}})); }
+---
+<Service {...Astro.props} />

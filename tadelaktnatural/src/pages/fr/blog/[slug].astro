@@ -1,0 +1,5 @@
+---
+import Article from '../../../components/LocalizedArticle.astro';
+export function getStaticPaths(){return ['quest-ce-que-le-tadelakt-origine-proprietes-applications','tadelakt-salles-de-bains-et-douches','tadelakt-ou-microciment'].map(slug=>({params:{slug},props:{locale:'fr',slug}}));}
+---
+<Article {...Astro.props} />
