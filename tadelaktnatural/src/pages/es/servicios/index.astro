@@ -1,0 +1,5 @@
+---
+import Layout from '../../../layouts/Layout.astro'; import { services } from '../../../data/site';
+const title='Servicios de tadelakt y revestimientos naturales | España'; const description='Servicios artesanales de tadelakt para baños, duchas, hammams, piscinas, cocinas, paredes y suelos.';
+---
+<Layout {title} {description} path="/es/servicios/"><div class="breadcrumbs">Inicio / Servicios</div><section class="section container"><p class="eyebrow">Servicios</p><h1>Revestimientos que hacen espacio.</h1><p class="lead">Cada proyecto se estudia según el soporte, la humedad, el uso y la atmósfera que quieres crear.</p><div class="cards">{services.map((service)=><article class="card"><a href={`/es/servicios/${service.slug}/`}><img src={service.image} alt={`${service.title} en tadelakt`} width="800" height="600" loading="lazy"/><div class="card-body"><h2>{service.title}</h2><p>{service.text}</p></div></a></article>)}</div></section></Layout>

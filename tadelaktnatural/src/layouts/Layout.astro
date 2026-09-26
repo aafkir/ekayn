@@ -1,0 +1,58 @@
+---
+import { site } from '../data/site';
+import '../styles/global.css';
+interface Props { title: string; description: string; path: string; image?: string; noindex?: boolean; schema?: Record<string, unknown>; }
+const { title, description, path, image = '/assets/1d40bda2c59faa8c.jpg', noindex = false, schema } = Astro.props;
+const canonical = `${site.url}${path}`;
+const organization = { '@context': 'https://schema.org', '@type': 'Organization', name: site.name, url: site.url, email: `mailto:${site.email}`, sameAs: [site.instagram] };
+const graph = schema ? { '@context': 'https://schema.org', '@graph': [organization, schema] } : organization;
+---
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="robots" content={noindex ? 'noindex,follow' : 'index,follow'} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_ES" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={`${site.url}${image}`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={`${site.url}${image}`} />
+    <link rel="icon" href="/assets/2db26d9d446d7cdc.jpg" />
+    <link rel="alternate" hreflang="es" href={canonical} />
+    <link rel="alternate" hreflang="x-default" href={canonical} />
+    <script type="application/ld+json" set:html={JSON.stringify(graph)} />
+  </head>
+  <body>
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
+    <header class="site-header">
+      <a class="logo" href="/es/" aria-label="Tadelakt Natural, inicio">TADELAKT <span>NATURAL</span></a>
+      <button class="menu-toggle" aria-expanded="false" aria-controls="main-nav">Menú</button>
+      <nav id="main-nav" aria-label="Navegación principal">
+        {site.nav.map((item) => <a href={item.href}>{item.label}</a>)}
+        <a class="button button-small" href="/es/contacto/">Solicitar presupuesto</a>
+      </nav>
+    </header>
+    <main id="contenido"><slot /></main>
+    <footer class="site-footer">
+      <div><p class="eyebrow">TADELAKT NATURAL</p><p>Revestimientos artesanales de cal y materiales naturales.</p></div>
+      <div><p class="eyebrow">Contacto</p><a href={`mailto:${site.email}`}>{site.email}</a><span>{site.city}</span><a href={site.instagram} target="_blank" rel="noopener noreferrer">Instagram</a></div>
+      <div><p class="eyebrow">Explorar</p><a href="/es/servicios/">Servicios</a><a href="/es/proyectos/">Proyectos</a><a href="/es/contacto/">Contacto</a><a href="/es/aviso-legal/">Aviso legal</a><a href="/es/privacidad/">Privacidad</a><a href="/es/cookies/">Cookies</a></div>
+      <small>© {new Date().getFullYear()} Tadelakt Natural</small>
+    </footer>
+    <script>
+      const button = document.querySelector('.menu-toggle');
+      const nav = document.querySelector('#main-nav');
+      button?.addEventListener('click', () => { const open = button.getAttribute('aria-expanded') === 'true'; button.setAttribute('aria-expanded', String(!open)); nav?.classList.toggle('is-open', !open); });
+    </script>
+  </body>
+</html>
