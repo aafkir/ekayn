@@ -10,7 +10,7 @@ const canonicalUrl = new URL(canonicalPath, siteUrl).toString();
 <html lang="fr">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="description" content={description} />
     <meta name="theme-color" content="#152d3c" />
     <link rel="canonical" href={canonicalUrl} />
@@ -26,6 +26,20 @@ const canonicalUrl = new URL(canonicalPath, siteUrl).toString();
       footer .brand-image img { width: 170px; max-height: 58px; }
       .menu-panel .brand-image img { width: min(300px, 100%); filter: brightness(0) invert(1); }
       @media (max-width: 650px) { .brand-image img { width: 145px; max-height: 58px; } footer .brand-image img { width: 145px; } .brand-image .brand-tagline { font-size: 8px; letter-spacing: .8px; } }
+      /* Safari peut afficher un iPhone en "version pour ordinateur" avec une largeur CSS de bureau. */
+      @media (pointer: coarse) and (max-width: 1024px) {
+        header > nav { display: none; }
+        .hero { grid-template-columns: 1fr; padding: 10px 5% 40px; gap: 30px; }
+        .hero-copy { padding-top: 26px; }
+        .hero-photo { min-height: 450px; }
+        .products { grid-template-columns: 1fr; }
+        .product-image { height: auto; aspect-ratio: 4 / 5; }
+        .heritage { grid-template-columns: 1fr; gap: 25px; padding: 45px 6%; }
+        .heritage-label { display: flex; gap: 20px; align-items: center; }
+        .heritage-label > span { font-size: 58px; }
+        .heritage-label p { margin: 0; }
+        .steps { flex-direction: column; gap: 8px; margin-top: 30px; }
+      }
     </style>
   </head>
   <body>
