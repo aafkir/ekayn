@@ -19,6 +19,14 @@ const canonicalUrl = new URL(canonicalPath, siteUrl).toString();
     <meta property="og:type" content="website" />
     <link rel="icon" type="image/png" href="/assets/icon.png" />
     <title>{title}</title>
+    <script is:inline>
+      // Safari peut masquer l'iPhone dans son user-agent quand "Version pour ordinateur" est actif.
+      const isAppleTouchDevice = /iPhone|iPad|iPod/.test(navigator.userAgent)
+        || (navigator.userAgent.includes('Macintosh') && navigator.maxTouchPoints > 1);
+      if (isAppleTouchDevice || window.screen.width <= 768) {
+        document.documentElement.classList.add('mobile-device');
+      }
+    </script>
     <style is:global>
       .brand-image { display: inline-flex; flex-direction: column; align-items: flex-start; }
       .brand-image img { display: block; width: 190px; height: auto; max-height: 72px; object-fit: contain; }
@@ -40,6 +48,18 @@ const canonicalUrl = new URL(canonicalPath, siteUrl).toString();
         .heritage-label p { margin: 0; }
         .steps { flex-direction: column; gap: 8px; margin-top: 30px; }
       }
+      /* Fallback pour le mode "site desktop" de Safari sur iPhone. */
+      html.mobile-device header > nav { display: none !important; }
+      html.mobile-device .hero { grid-template-columns: 1fr; padding: 10px 5% 40px; gap: 30px; }
+      html.mobile-device .hero-copy { padding-top: 26px; }
+      html.mobile-device .hero-photo { min-height: 450px; }
+      html.mobile-device .products { grid-template-columns: 1fr; }
+      html.mobile-device .product-image { height: auto; aspect-ratio: 4 / 5; }
+      html.mobile-device .heritage { grid-template-columns: 1fr; gap: 25px; padding: 45px 6%; }
+      html.mobile-device .heritage-label { display: flex; gap: 20px; align-items: center; }
+      html.mobile-device .heritage-label > span { font-size: 58px; }
+      html.mobile-device .heritage-label p { margin: 0; }
+      html.mobile-device .steps { flex-direction: column; gap: 8px; margin-top: 30px; }
     </style>
   </head>
   <body>
