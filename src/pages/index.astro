@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProductCard from '../components/ProductCard.astro';
+import StorePanels from '../components/StorePanels.astro';
+import { products } from '../data/products';
+export const prerender = true;
+const collectionOrder = ['eclat-de-tradition', 'parure-berbere', 'lien-d-heritage', 'spirales-d-argent', 'presence-amazighe', 'medailles-du-sud'];
+const collectionProducts = collectionOrder.map((slug) => products.find((product) => product.slug === slug)).filter(Boolean);
+---
+<style is:global>
+  .hero-photo > video { width: 100%; height: 100%; position: absolute; object-fit: cover; object-position: 47% center; }
+  .tifinagh-mark { font-weight: 700; }
+  .eyebrow > .tifinagh-mark { display: inline-block; font-size: 27px; margin-right: 14px; vertical-align: middle; }
+  .heritage-label > .tifinagh-mark { display: block; font-family: Georgia, serif; font-size: 110px; color: var(--copper); line-height: 1; }
+  @media (max-width: 650px) { .heritage-label > .tifinagh-mark { font-size: 58px; } }
+</style>
+<BaseLayout>
+  <main>
+    <section class="hero"><div class="hero-copy"><p class="eyebrow"><strong class="tifinagh-mark">ⵉ</strong> L'ÂME EKAYN</p><h1>Des bijoux.<br />Du caractère.<br /><em>Votre style.</em></h1><p class="intro">Des bijoux d’inspiration traditionnelle, pensés pour accompagner votre style au quotidien, pour une occasion ou comme idée cadeau.</p><a class="primary" href="#collection">Découvrir la collection <span>↗</span></a><div class="hero-note"><span class="line"></span> Des détails qui racontent une histoire.</div></div><div class="hero-photo"><video autoplay muted loop playsinline preload="metadata" poster="/assets/product1/product1.jpg" aria-label="Présentation vidéo de la collection Ekayn"><source src="/assets/hook.mp4" type="video/mp4" /></video><div class="photo-label"><span>LA COLLECTION EKAYN</span><span>01 — 06</span></div></div><div class="vertical">ÉLÉGANCE · DÉTAILS · STYLE</div></section>
+    <div class="ribbon"><span>Des bijoux de caractère</span><span><strong class="tifinagh-mark">ⵉ</strong></span><span>L’inspiration traditionnelle</span><span><strong class="tifinagh-mark">ⵉ</strong></span><span>À porter chaque jour</span><span><strong class="tifinagh-mark">ⵉ</strong></span></div>
+    <section class="collection" id="collection"><div class="section-head"><div><p class="eyebrow">LA SÉLECTION</p><h2>Une pièce, <em>votre histoire.</em></h2></div><p>Choisissez votre coup de cœur.<br />Livraison offerte en France.</p></div><div class="products">{collectionProducts.map((product, index) => <ProductCard product={product} index={index} />)}</div><p class="collection-note">Livraison offerte en France, une seule fois par commande.</p></section>
+    <section id="heritage" class="heritage"><div class="heritage-label"><strong class="tifinagh-mark">ⵉ</strong><p>L'ESPRIT EKAYN</p></div><div><h2>Des détails qui ont<br /><em>du caractère.</em></h2><p>Ekayn imagine une sélection de bijoux d’inspiration traditionnelle : des motifs, des couleurs et des volumes qui trouvent naturellement leur place dans une garde-robe contemporaine.</p><p>À porter pour soi, pour une occasion ou à offrir à quelqu’un qui aime les pièces qui ne ressemblent pas à toutes les autres.</p></div></section>
+    <section class="contact" id="contact"><p class="eyebrow">NOUS CONTACTER</p><h2>Votre prochain bijou<br />commence par <em>un échange.</em></h2><p>Une question sur une pièce ou votre commande ? Écrivez-nous directement.</p><a class="primary" href="/contact">Contacter Ekayn <span>↗</span></a><div class="steps"><span>01 · Choisissez votre bijou</span><span>02 · Écrivez-nous</span><span>03 · Recevez une réponse</span></div></section>
+  </main>
+  <StorePanels />
+  <script src="../scripts/store.ts"></script>
+</BaseLayout>

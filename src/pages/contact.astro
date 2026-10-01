@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import StorePanels from '../components/StorePanels.astro';
+export const prerender = true;
+---
+<BaseLayout title="Contacter — Ekayn" description="Contactez Ekayn pour une question sur un bijou ou une commande." canonicalPath="/contact">
+  <main class="contact-page">
+    <div class="contact-intro"><p class="eyebrow">NOUS ÉCRIRE</p><h1>Une question ?<br /><em>Parlons-en.</em></h1><p>Pour une question sur un bijou, votre commande ou une demande particulière, envoyez-nous un message. Nous vous répondrons dès que possible.</p></div>
+    <form id="contact-form" class="contact-form" novalidate><label>Nom<input name="name" required autocomplete="name" maxlength="100" /></label><label>Email<input name="email" type="email" required autocomplete="email" maxlength="160" /></label><label>Objet<input name="subject" required maxlength="160" /></label><label>Message<textarea name="message" required maxlength="4000" rows="7"></textarea></label><label class="form-trap" aria-hidden="true">Ne pas remplir<input name="website" tabindex="-1" autocomplete="off" /></label><button class="primary" type="submit">Envoyer <span>↗</span></button><p id="contact-status" role="status" aria-live="polite"></p></form>
+  </main>
+  <StorePanels />
+  <script src="../scripts/store.ts"></script>
+  <script>
+    const form = document.querySelector<HTMLFormElement>('#contact-form')!; const status = document.querySelector<HTMLElement>('#contact-status')!; const submit = form.querySelector<HTMLButtonElement>('button')!;
+    form.addEventListener('submit', async (event) => { event.preventDefault(); if (!form.reportValidity()) return; submit.disabled = true; submit.textContent = 'Envoi…'; status.textContent = '';
+      try { const response = await fetch('/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.fromEntries(new FormData(form))) }); const data = await response.json(); if (!response.ok) throw new Error(data.error || 'Une erreur est survenue.'); status.textContent = data.message; form.reset(); }
+      catch (error) { status.textContent = error instanceof Error ? error.message : 'Impossible d’envoyer le message pour le moment.'; }
+      finally { submit.disabled = false; submit.innerHTML = 'Envoyer <span>↗</span>'; }
+    });
+  </script>
+  <style is:global>
+    .contact-page { max-width: 1100px; margin: 0 auto; padding: 95px 6% 110px; display: grid; grid-template-columns: 1fr 1fr; gap: 12%; }
+    .contact-intro h1 { font-size: clamp(48px, 6vw, 76px); line-height: 1.04; }
+    .contact-intro > p:not(.eyebrow) { max-width: 430px; color: var(--muted); margin-top: 28px; }
+    .contact-form { display: flex; flex-direction: column; gap: 18px; }
+    .contact-form label { display: grid; gap: 7px; font-size: 13px; }
+    .contact-form input, .contact-form textarea { width: 100%; border: 1px solid var(--line); background: white; padding: 13px; font: inherit; color: var(--ink); }
+    .contact-form textarea { resize: vertical; }.contact-form button { align-self: flex-start; }.contact-form button:disabled { opacity: .65; cursor: wait; }
+    #contact-status { min-height: 24px; color: var(--copper); font-size: 14px; }.form-trap { position: absolute; left: -10000px; }
+    @media (max-width: 700px) { .contact-page { grid-template-columns: 1fr; gap: 45px; padding: 60px 6% 75px; } }
+  </style>
+</BaseLayout>

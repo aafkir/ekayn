@@ -1,0 +1,9 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import StorePanels from '../components/StorePanels.astro';
+export const prerender = true;
+---
+<BaseLayout title="Paiement annulé — Ekayn" description="Votre paiement Ekayn a été annulé.">
+  <main class="payment-result"><p class="eyebrow">PAIEMENT ANNULÉ</p><h1>Votre panier est conservé.</h1><p>Le paiement n’a pas été finalisé. Vous pouvez revenir au panier et réessayer quand vous le souhaitez.</p><a class="primary" href="/">Retour à la collection <span>↗</span></a></main><StorePanels /><script src="../scripts/store.ts"></script>
+  <style is:global>.payment-result { max-width: 850px; min-height: 55vh; margin: 0 auto; padding: 110px 6%; }.payment-result h1 { font-size: clamp(45px, 6vw, 76px); }.payment-result p:not(.eyebrow) { color: var(--muted); margin: 25px 0 32px; }</style>
+</BaseLayout>

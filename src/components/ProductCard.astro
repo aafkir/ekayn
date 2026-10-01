@@ -1,0 +1,18 @@
+---
+import type { Product } from '../data/products';
+const { product, index } = Astro.props as { product: Product; index: number };
+---
+<article>
+  <a class="product-link" href={`/produits/${product.slug}`} aria-label={`Voir ${product.name}`}>
+    <div class="product-image"><span class="ref">{product.reference}</span><img src={product.image} loading="lazy" width="800" height="1000" alt={product.alt} /></div>
+    <div class="product-title"><h3>{product.name}</h3><span>0{index + 1}</span></div>
+  </a>
+  <p>{product.shortDescription ?? product.description}</p>
+  <p class="price">{(product.priceCents / 100).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}</p>
+  <button class="add-cart primary" data-id={product.id}>Ajouter au panier <span>+</span></button>
+  <a class="product-order" href={`/contact?produit=${product.slug}`}>Contacter à propos de ce produit <span>↗</span></a>
+</article>
+<style>
+  .product-link { display: block; }
+  .product-link:hover h3 { color: var(--copper); }
+</style>

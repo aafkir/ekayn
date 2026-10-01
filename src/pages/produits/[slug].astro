@@ -1,0 +1,105 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import StorePanels from '../../components/StorePanels.astro';
+import { products, returnsDescription, shippingDescription } from '../../data/products';
+export const prerender = true;
+
+export function getStaticPaths() {
+  return products.map((product) => ({ params: { slug: product.slug }, props: { product } }));
+}
+
+const { product } = Astro.props;
+const related = products.filter((item) => item.id !== product.id).slice(0, 3);
+const price = (product.priceCents / 100).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
+const pageTitle = `${product.name} — Ekayn`;
+const pageDescription = `${product.name}, ${product.description} Découvrez ce bijou Ekayn.`;
+const structuredProduct = { '@context': 'https://schema.org', '@type': 'Product', name: product.name, description: product.description, image: product.images.map((image) => new URL(image.src, Astro.site ?? 'https://tifilit.com').toString()), sku: product.reference, brand: { '@type': 'Brand', name: 'Ekayn' }, offers: { '@type': 'Offer', priceCurrency: 'EUR', price: (product.priceCents / 100).toFixed(2), url: new URL(`/produits/${product.slug}`, Astro.site ?? 'https://tifilit.com').toString() } };
+---
+<BaseLayout title={pageTitle} description={pageDescription} canonicalPath={`/produits/${product.slug}`}>
+  <script type="application/ld+json" set:html={JSON.stringify(structuredProduct)}></script>
+  <style is:global>
+    .product-page { max-width: 1440px; margin: 0 auto; padding: 30px 6% 90px; }
+    .breadcrumbs { display: flex; flex-wrap: wrap; gap: 8px; color: var(--muted); font-size: 12px; margin-bottom: 35px; }
+    .breadcrumbs a { text-decoration: underline; text-underline-offset: 3px; }
+    .product-detail { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(340px, .85fr); gap: clamp(40px, 7vw, 105px); align-items: start; }
+    .product-gallery { display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 16px; position: sticky; top: 25px; }
+    .gallery-main { margin: 0; aspect-ratio: 4 / 5; background: #e9e7e2; overflow: hidden; }
+    .gallery-main img { width: 100%; height: 100%; display: block; object-fit: cover; }
+    .gallery-thumbs { display: flex; flex-direction: column; gap: 10px; }
+    .gallery-thumb { padding: 0; border: 1px solid transparent; background: #e9e7e2; cursor: pointer; aspect-ratio: 1 / 1; overflow: hidden; }
+    .gallery-thumb[aria-current="true"] { border-color: var(--copper); }
+    .gallery-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .zoom-button { position: absolute; right: 16px; bottom: 16px; border: 0; background: var(--paper); color: var(--ink); padding: 9px 13px; font-size: 12px; }
+    .product-info .eyebrow { color: var(--copper); margin-bottom: 14px; }
+    .product-info h1 { font-size: clamp(42px, 5vw, 72px); line-height: 1.05; letter-spacing: -2px; }
+    .product-description { color: var(--muted); max-width: 500px; margin: 25px 0; }
+    .product-price { font-size: 20px; margin: 25px 0; }
+    .purchase-box { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 22px 0; }
+    .quantity-control { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+    .quantity-control button { width: 38px; height: 38px; border: 1px solid var(--line); background: transparent; color: var(--ink); }
+    .quantity-control output { min-width: 20px; text-align: center; }
+    .detail-add { width: 100%; justify-content: space-between; }
+    .add-confirmation { min-height: 24px; color: var(--copper); font-size: 13px; margin: 14px 0 0; }
+    .cart-access { text-decoration: underline; text-underline-offset: 3px; }
+    .product-notes { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line); margin-top: 28px; }
+    .product-note { background: var(--paper); padding: 18px 16px; }
+    .product-note strong { display: block; font-family: Georgia, serif; font-size: 17px; font-weight: 400; margin-bottom: 5px; }
+    .product-note p { color: var(--muted); font-size: 13px; margin: 0; }
+    .specifications { margin-top: 42px; border-top: 1px solid var(--line); }
+    .specifications h2 { font-size: 27px; margin: 25px 0 10px; }
+    .specifications dl { margin: 0; }
+    .specifications div { display: flex; justify-content: space-between; gap: 20px; border-bottom: 1px solid var(--line); padding: 12px 0; font-size: 14px; }
+    .specifications dt { color: var(--muted); }.specifications dd { margin: 0; text-align: right; }
+    .related-products { border-top: 1px solid var(--line); margin-top: 85px; padding-top: 70px; }
+    .related-products .products { margin-top: 35px; }
+    .lightbox { border: 0; padding: 0; width: min(94vw, 1100px); max-width: none; background: transparent; }
+    .lightbox::backdrop { background: rgba(13, 28, 37, .9); }
+    .lightbox figure { margin: 0; position: relative; }
+    .lightbox img { display: block; max-width: 100%; max-height: 88vh; margin: auto; object-fit: contain; }
+    .lightbox button { position: absolute; border: 0; background: var(--paper); color: var(--ink); width: 42px; height: 42px; font-size: 22px; }
+    .lightbox-close { right: 0; top: -52px; }.lightbox-prev { left: 12px; top: 50%; }.lightbox-next { right: 12px; top: 50%; }
+    @media (max-width: 800px) { .product-page { padding: 22px 5% 65px; } .product-detail { display: block; } .product-gallery { position: relative; display: flex; flex-direction: column-reverse; gap: 12px; } .gallery-thumbs { flex-direction: row; overflow-x: auto; padding-bottom: 2px; } .gallery-thumb { flex: 0 0 66px; } .gallery-main { aspect-ratio: 1 / 1.08; } .product-info { margin-top: 38px; } .product-notes { grid-template-columns: 1fr; } .related-products { margin-top: 58px; padding-top: 48px; } .related-products .products { grid-template-columns: 1fr; } .lightbox-prev { left: 4px; }.lightbox-next { right: 4px; } }
+  </style>
+  <main class="product-page">
+    <nav class="breadcrumbs" aria-label="Fil d’Ariane"><a href="/">Accueil</a><span aria-hidden="true">→</span><a href="/#collection">Collection</a><span aria-hidden="true">→</span><span aria-current="page">{product.name}</span></nav>
+    <section class="product-detail">
+      <div class="product-gallery" aria-label={`Galerie de ${product.name}`}>
+        <div class="gallery-thumbs" role="list">
+          {product.images.map((image, index) => <button class="gallery-thumb" type="button" role="listitem" aria-label={`Afficher la photo ${index + 1}`} aria-current={index === 0 ? 'true' : 'false'} data-gallery-src={image.src} data-gallery-alt={image.alt}><img src={image.src} alt="" loading={index === 0 ? 'eager' : 'lazy'} /></button>)}
+        </div>
+        <figure class="gallery-main"><img id="gallery-main-image" src={product.images[0].src} alt={product.images[0].alt} width="1000" height="1250" fetchpriority="high" /><button class="zoom-button" id="open-lightbox" type="button">Agrandir ↗</button></figure>
+      </div>
+      <div class="product-info">
+        <p class="eyebrow">{product.reference}</p><h1>{product.name}</h1><p class="product-description">{product.description}</p><p class="product-price">{price}</p>
+        <div class="purchase-box"><div class="quantity-control" aria-label="Quantité"><span>Quantité</span><button id="decrease-quantity" type="button" aria-label="Diminuer la quantité">−</button><output id="quantity-value" for="decrease-quantity increase-quantity">1</output><button id="increase-quantity" type="button" aria-label="Augmenter la quantité">+</button></div><button id="detail-add-cart" class="primary detail-add add-cart" type="button" data-id={product.id} data-quantity="1">Ajouter au panier <span>+</span></button><p id="add-confirmation" class="add-confirmation" role="status" aria-live="polite"></p><a class="cart-access" href="#" id="open-cart-after-add">Voir mon panier</a></div>
+        <div class="product-notes"><div class="product-note"><strong>Livraison</strong><p>{shippingDescription}</p></div><div class="product-note"><strong>Retours</strong><p>{returnsDescription}</p></div></div>
+        <section class="specifications"><h2>À savoir</h2><dl><div><dt>Matière</dt><dd>Non renseignée</dd></div><div><dt>Dimensions</dt><dd>Non renseignées</dd></div><div><dt>Entretien</dt><dd>Éviter l’eau et les parfums, ranger à l’abri de l’humidité.</dd></div></dl></section>
+      </div>
+    </section>
+    <section class="related-products"><p class="eyebrow">À DÉCOUVRIR AUSSI</p><h2>Des pièces qui pourraient vous plaire.</h2><div class="products">{related.map((item, index) => <ProductCard product={item} index={index} />)}</div></section>
+  </main>
+  <dialog class="lightbox" id="lightbox" aria-label={`Image agrandie de ${product.name}`}><figure><button class="lightbox-close" id="close-lightbox" type="button" aria-label="Fermer la galerie">×</button><button class="lightbox-prev" id="previous-image" type="button" aria-label="Photo précédente">‹</button><img id="lightbox-image" src={product.images[0].src} alt={product.images[0].alt} /><button class="lightbox-next" id="next-image" type="button" aria-label="Photo suivante">›</button></figure></dialog>
+  <StorePanels />
+  <script define:vars={{ gallery: product.images.map((image) => image) }}>
+    const mainImage = document.querySelector('#gallery-main-image');
+    const lightbox = document.querySelector('#lightbox');
+    const lightboxImage = document.querySelector('#lightbox-image');
+    const thumbs = [...document.querySelectorAll('.gallery-thumb')];
+    let current = 0;
+    const showImage = (index) => { current = (index + gallery.length) % gallery.length; const image = gallery[current]; mainImage.src = image.src; mainImage.alt = image.alt; lightboxImage.src = image.src; lightboxImage.alt = image.alt; thumbs.forEach((thumb, i) => thumb.setAttribute('aria-current', String(i === current))); };
+    thumbs.forEach((thumb, index) => thumb.addEventListener('click', () => showImage(index)));
+    document.querySelector('#open-lightbox').addEventListener('click', () => lightbox.showModal());
+    document.querySelector('#close-lightbox').addEventListener('click', () => lightbox.close());
+    document.querySelector('#previous-image').addEventListener('click', () => showImage(current - 1));
+    document.querySelector('#next-image').addEventListener('click', () => showImage(current + 1));
+    lightbox.addEventListener('keydown', (event) => { if (event.key === 'ArrowLeft') showImage(current - 1); if (event.key === 'ArrowRight') showImage(current + 1); });
+    const quantity = document.querySelector('#quantity-value'); const addButton = document.querySelector('#detail-add-cart');
+    const setQuantity = (value) => { const next = Math.min(99, Math.max(1, value)); quantity.textContent = String(next); addButton.dataset.quantity = String(next); };
+    document.querySelector('#decrease-quantity').addEventListener('click', () => setQuantity(Number(quantity.textContent) - 1));
+    document.querySelector('#increase-quantity').addEventListener('click', () => setQuantity(Number(quantity.textContent) + 1));
+    addButton.addEventListener('click', () => { document.querySelector('#add-confirmation').textContent = `${quantity.textContent} article${Number(quantity.textContent) > 1 ? 's' : ''} ajouté${Number(quantity.textContent) > 1 ? 's' : ''} au panier.`; });
+    document.querySelector('#open-cart-after-add').addEventListener('click', (event) => { event.preventDefault(); document.querySelector('#cart-panel').showModal(); });
+  </script>
+  <script src="../../scripts/store.ts"></script>
+</BaseLayout>
