@@ -3,7 +3,8 @@ import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 const { title = 'Ekayn — Bijoux d’inspiration traditionnelle', description = 'Découvrez Ekayn, une sélection de bijoux élégants d’inspiration traditionnelle.', canonicalPath = '/' } = Astro.props;
-const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://tifilit.com';
+const configuredSiteUrl = import.meta.env.PUBLIC_SITE_URL;
+const siteUrl = configuredSiteUrl && !configuredSiteUrl.includes('tifilit.com') ? configuredSiteUrl : 'https://ekayn.com';
 const canonicalUrl = new URL(canonicalPath, siteUrl).toString();
 ---
 <!doctype html>
@@ -17,6 +18,11 @@ const canonicalUrl = new URL(canonicalPath, siteUrl).toString();
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:site_name" content="Ekayn" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
     <link rel="icon" type="image/png" href="/assets/icon.png" />
     <title>{title}</title>
     <script is:inline>

@@ -16,7 +16,7 @@ Le projet utilise l’adaptateur Cloudflare en rendu serveur pour les endpoints 
 
 Les variables sont listées dans `.env.example`. Ne commitez jamais `.env` ni de clé Stripe.
 
-- `PUBLIC_SITE_URL` : domaine public, actuellement conservé sur le domaine existant `tifilit.com` tant qu’il n’est pas changé explicitement.
+- `PUBLIC_SITE_URL` : domaine public du site, `https://ekayn.com`.
 - `STRIPE_SECRET_KEY` : clé Stripe de test `sk_test_…`.
 - `STRIPE_WEBHOOK_SECRET` : secret `whsec_…` du webhook.
 - `RESEND_API_KEY`, `CONTACT_EMAIL`, `CONTACT_FROM` : service d’envoi du formulaire de contact.

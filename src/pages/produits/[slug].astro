@@ -14,7 +14,8 @@ const related = products.filter((item) => item.id !== product.id).slice(0, 3);
 const price = (product.priceCents / 100).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
 const pageTitle = `${product.name} — Ekayn`;
 const pageDescription = `${product.name}, ${product.description} Découvrez ce bijou Ekayn.`;
-const structuredProduct = { '@context': 'https://schema.org', '@type': 'Product', name: product.name, description: product.description, image: product.images.map((image) => new URL(image.src, Astro.site ?? 'https://tifilit.com').toString()), sku: product.reference, brand: { '@type': 'Brand', name: 'Ekayn' }, offers: { '@type': 'Offer', priceCurrency: 'EUR', price: (product.priceCents / 100).toFixed(2), url: new URL(`/produits/${product.slug}`, Astro.site ?? 'https://tifilit.com').toString() } };
+const siteUrl = Astro.site ?? new URL('https://ekayn.com');
+const structuredProduct = { '@context': 'https://schema.org', '@type': 'Product', name: product.name, description: product.description, image: product.images.map((image) => new URL(image.src, siteUrl).toString()), sku: product.reference, brand: { '@type': 'Brand', name: 'Ekayn' }, offers: { '@type': 'Offer', priceCurrency: 'EUR', price: (product.priceCents / 100).toFixed(2), url: new URL(`/produits/${product.slug}`, siteUrl).toString() } };
 ---
 <BaseLayout title={pageTitle} description={pageDescription} canonicalPath={`/produits/${product.slug}`}>
   <script type="application/ld+json" set:html={JSON.stringify(structuredProduct)}></script>
