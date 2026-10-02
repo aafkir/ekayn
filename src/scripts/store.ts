@@ -3,7 +3,7 @@ import { products, shippingCents } from '../data/products';
 const money = (cents: number) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(cents / 100);
 let cart: Record<string, number> = {};
 try {
-  const saved = JSON.parse(localStorage.getItem('ekayn-cart') ?? localStorage.getItem('tifilit-cart') ?? '{}');
+  const saved = JSON.parse(localStorage.getItem('ekayn-cart') ?? '{}');
   const version = localStorage.getItem('ekayn-cart-version');
   const legacyIds: Record<string, string> = { '2': '6', '3': '5', '4': '3', '5': '2', '6': '4' };
   products.forEach((product) => { const sourceId = version === '2' ? product.id : Object.keys(legacyIds).find((legacyId) => legacyIds[legacyId] === product.id) ?? product.id; if (Number.isInteger(saved[sourceId]) && saved[sourceId] > 0 && saved[sourceId] <= 99) cart[product.id] = saved[sourceId]; });
@@ -45,7 +45,7 @@ const renderCart = () => {
   checkout.disabled = !entries.length;
   checkout.textContent = entries.length ? `Passer au paiement · ${money(total)}` : 'Passer au paiement';
 };
-const save = () => { try { localStorage.setItem('ekayn-cart', JSON.stringify(cart)); localStorage.removeItem('tifilit-cart'); } catch { /* storage unavailable */ } renderCart(); };
+const save = () => { try { localStorage.setItem('ekayn-cart', JSON.stringify(cart)); } catch { /* storage unavailable */ } renderCart(); };
 document.querySelectorAll<HTMLElement>('.add-cart').forEach((button) => button.addEventListener('click', () => { const quantity = Math.min(99, Math.max(1, Number(button.dataset.quantity ?? 1))); cart[button.dataset.id!] = Math.min(99, (cart[button.dataset.id!] ?? 0) + quantity); save(); const toast = $('#toast'); toast.textContent = `${quantity} bijou${quantity > 1 ? 'x' : ''} ajouté${quantity > 1 ? 's' : ''} au panier`; toast.classList.add('visible'); setTimeout(() => toast.classList.remove('visible'), 2500); }));
 $('#card-checkout').addEventListener('click', async () => {
   const button = $('#card-checkout') as HTMLButtonElement; const feedback = $('#cart-feedback');
