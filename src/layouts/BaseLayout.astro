@@ -60,6 +60,31 @@ const canonicalUrl = new URL(canonicalPath, siteUrl).toString();
       html.mobile-device .heritage-label > span { font-size: 58px; }
       html.mobile-device .heritage-label p { margin: 0; }
       html.mobile-device .steps { flex-direction: column; gap: 8px; margin-top: 30px; }
+      /* Un navigateur mobile en mode desktop peut exposer une largeur CSS proche de 980px. */
+      @media (max-width: 1100px) {
+        header { height: 85px; padding: 0 5%; }
+        header > nav { display: none; }
+        .brand-image img { width: 145px; max-height: 58px; }
+        .brand-image .brand-tagline { font-size: 8px; letter-spacing: .8px; }
+        .header-tools { gap: 8px; }
+        .hero { grid-template-columns: 1fr; padding: 10px 5% 40px; gap: 30px; }
+        .hero-copy { padding-top: 26px; }
+        .hero-photo { min-height: 450px; }
+        h1 { font-size: clamp(46px, 15vw, 59px); letter-spacing: -2px; }
+        .products { grid-template-columns: 1fr; gap: 40px; }
+        .product-image { height: auto; aspect-ratio: 4 / 5; }
+        .collection { padding: 55px 5%; }
+        .section-head { display: block; }
+        .section-head > p { margin-top: 18px; }
+        .heritage { grid-template-columns: 1fr; gap: 25px; padding: 45px 6%; }
+        .heritage-label { display: flex; gap: 20px; align-items: center; }
+        .heritage-label > span { font-size: 58px; }
+        .heritage-label p { margin: 0; }
+        .contact { padding: 60px 6% 40px; }
+        .steps { flex-direction: column; gap: 8px; margin-top: 30px; }
+        footer { flex-wrap: wrap; gap: 15px; }
+        footer p { display: none; }
+      }
     </style>
   </head>
   <body>
