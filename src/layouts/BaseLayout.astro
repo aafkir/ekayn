@@ -23,7 +23,7 @@ const canonicalUrl = new URL(canonicalPath, siteUrl).toString();
       // Safari peut masquer l'iPhone dans son user-agent quand "Version pour ordinateur" est actif.
       const isAppleTouchDevice = /iPhone|iPad|iPod/.test(navigator.userAgent)
         || (navigator.userAgent.includes('Macintosh') && navigator.maxTouchPoints > 1);
-      if (isAppleTouchDevice || window.screen.width <= 768) {
+      if (isAppleTouchDevice || window.innerWidth <= 1100 || window.screen.width <= 1100) {
         document.documentElement.classList.add('mobile-device');
       }
     </script>
@@ -60,6 +60,11 @@ const canonicalUrl = new URL(canonicalPath, siteUrl).toString();
       html.mobile-device .heritage-label > span { font-size: 58px; }
       html.mobile-device .heritage-label p { margin: 0; }
       html.mobile-device .steps { flex-direction: column; gap: 8px; margin-top: 30px; }
+      html.mobile-device .contact-page { grid-template-columns: 1fr; gap: 45px; padding: 60px 6% 75px; }
+      html.mobile-device .payment-result,
+      html.mobile-device .not-found { padding: 60px 6% 75px; }
+      html.mobile-device .payment-result h1,
+      html.mobile-device .not-found h1 { font-size: clamp(42px, 12vw, 62px); }
       /* Un navigateur mobile en mode desktop peut exposer une largeur CSS proche de 980px. */
       @media (max-width: 1100px) {
         header { height: 85px; padding: 0 5%; }
