@@ -2,6 +2,19 @@
   "name": "tadelakt-natural",
   "private": true,
   "type": "module",
-  "scripts": { "dev": "astro dev", "build": "astro build", "preview": "astro preview", "check": "astro check" },
-  "dependencies": { "@astrojs/check": "latest", "astro": "latest", "typescript": "latest" }
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "test": "node --test tests/cart.test.mjs"
+  },
+  "dependencies": {
+    "@astrojs/check": "latest",
+    "astro": "latest",
+    "typescript": "latest"
+  },
+  "devDependencies": {
+    "wrangler": "^4.141.0"
+  }
 }

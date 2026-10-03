@@ -1,5 +1,8 @@
 ---
 import Article from '../../../components/LocalizedArticle.astro';
-export function getStaticPaths(){return ['what-is-tadelakt-origin-properties-uses','tadelakt-bathrooms-and-showers','tadelakt-or-microcement'].map(slug=>({params:{slug},props:{locale:'en',slug}}));}
+export function getStaticPaths(){return [
+  ['what-is-tadelakt-origin-properties-uses','What is tadelakt? Origin, properties and uses'], ['tadelakt-bathrooms-and-showers','Tadelakt bathrooms and showers: benefits and precautions'], ['tadelakt-or-microcement','Tadelakt or microcement: how to choose'],
+  ['tadelakt-history-origin','History and origin of tadelakt: the ancient art of lime'], ['tadelakt-outdoors','Why choose tadelakt for outdoor spaces?'], ['tadelakt-kitchens','Tadelakt kitchens: beauty and natural resistance'], ['tadelakt-colours','What colours can tadelakt achieve?'], ['tadelakt-benefits-modern-bathrooms','Benefits of tadelakt for modern bathrooms'], ['why-choose-tadelakt-bathroom','Why choose tadelakt for a bathroom?'], ['clean-and-maintain-tadelakt','How to clean and maintain tadelakt correctly'], ['tadelakt-technique','The tadelakt technique: secrets of this ancestral finish'], ['why-choose-tadelakt','Why choose tadelakt?'], ['5-reasons-tadelakt-bathroom','5 reasons to choose tadelakt for your bathroom']
+].map(([slug,title])=>({params:{slug},props:{locale:'en',slug,title}}));}
 ---
 <Article {...Astro.props} />

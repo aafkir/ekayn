@@ -1,5 +1,8 @@
 ---
 import Article from '../../../components/LocalizedArticle.astro';
-export function getStaticPaths(){return ['quest-ce-que-le-tadelakt-origine-proprietes-applications','tadelakt-salles-de-bains-et-douches','tadelakt-ou-microciment'].map(slug=>({params:{slug},props:{locale:'fr',slug}}));}
+export function getStaticPaths(){return [
+  ['quest-ce-que-le-tadelakt-origine-proprietes-applications','Qu’est-ce que le tadelakt : origine, propriétés et applications'], ['tadelakt-salles-de-bains-et-douches','Tadelakt pour salles de bains et douches : avantages et précautions'], ['tadelakt-ou-microciment','Tadelakt ou microciment : comment choisir'],
+  ['histoire-origine-tadelakt','Histoire et origine du tadelakt : l’art ancestral de la chaux'], ['tadelakt-exterieurs','Pourquoi choisir le tadelakt pour les extérieurs ?'], ['tadelakt-cuisines','Tadelakt dans les cuisines : beauté et résistance naturelle'], ['couleurs-tadelakt','Quelles couleurs peut-on obtenir avec le tadelakt ?'], ['bienfaits-tadelakt-bains-modernes','Les bienfaits du tadelakt pour les salles de bains modernes'], ['pourquoi-choisir-tadelakt-salle-de-bains','Pourquoi choisir le tadelakt pour la salle de bains ?'], ['entretenir-nettoyer-tadelakt','Comment entretenir et nettoyer correctement le tadelakt'], ['technique-tadelakt','La technique du tadelakt : les secrets de son application'], ['pourquoi-choisir-tadelakt','Pourquoi choisir le tadelakt ?'], ['5-raisons-tadelakt-salle-de-bains','5 raisons de choisir le tadelakt pour votre salle de bains']
+].map(([slug,title])=>({params:{slug},props:{locale:'fr',slug,title}}));}
 ---
 <Article {...Astro.props} />

@@ -6,7 +6,8 @@ interface Props { title: string; description: string; path: string; image?: stri
 const { title, description, path, image = '/assets/1d40bda2c59faa8c.jpg', noindex = false, schema, locale = 'es', equivalents = {} } = Astro.props as Props;
 const text = ui[locale];
 const langPaths = languagePaths[locale];
-const nav = [{ href: langPaths.material, label: text.material }, { href: langPaths.services, label: text.services }, { href: langPaths.projects, label: text.projects }, { href: langPaths.blog, label: text.blog }, { href: langPaths.about, label: text.about }];
+const navLabels = locale === 'fr' ? ['Accueil', 'Tadelakt', 'Produits', 'Réalisations', 'À propos', 'Contact'] : locale === 'en' ? ['Home', 'Tadelakt', 'Products', 'Projects', 'About', 'Contact'] : ['Inicio', 'Tadelakt', 'Productos', 'Proyectos', 'Nosotros', 'Contacto'];
+const nav = [langPaths.home, langPaths.material, langPaths.shop, langPaths.projects, langPaths.about, langPaths.contact].map((href, index) => ({ href, label: navLabels[index] }));
 const alternatePaths = { es: equivalents.es || (locale === 'es' ? path : '/es/'), fr: equivalents.fr || (locale === 'fr' ? path : '/fr/'), en: equivalents.en || (locale === 'en' ? path : '/en/') };
 const canonical = `${site.url}${path}`;
 const organization = { '@context': 'https://schema.org', '@type': 'Organization', name: site.name, url: site.url, email: `mailto:${site.email}`, sameAs: [site.instagram] };
@@ -16,7 +17,10 @@ const graph = schema ? { '@context': 'https://schema.org', '@graph': [organizati
 <html lang={locales[locale].lang}>
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <script is:inline>
+      (() => { const mobileDevice = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent); const updateViewportClass = () => { const mobile = mobileDevice || window.innerWidth <= 900; document.documentElement.classList.toggle('is-mobile', mobile); document.documentElement.classList.toggle('is-small-mobile', mobile && window.innerWidth <= 480); }; updateViewportClass(); window.addEventListener('resize', updateViewportClass); window.addEventListener('orientationchange', updateViewportClass); })();
+    </script>
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
@@ -40,25 +44,59 @@ const graph = schema ? { '@context': 'https://schema.org', '@graph': [organizati
   <body>
     <a class="skip-link" href="#contenido">{text.skip}</a>
     <header class="site-header">
-      <a class="logo" href={langPaths.home} aria-label={`${site.name}, ${locales[locale].label}`}><img src="/assets/logo/logo.png" alt={site.name} width="220" height="127" /></a>
-      <button class="menu-toggle" aria-expanded="false" aria-controls="main-nav">{text.menu}</button>
-      <nav id="main-nav" aria-label="Navegación principal">
-        {nav.map((item) => <a href={item.href}>{item.label}</a>)}
-        <div class="language-switcher" aria-label="Language selector">{Object.entries(locales).map(([code, item]) => <a class:list-active={code === locale} href={alternatePaths[code as Locale]} lang={item.lang} aria-current={code === locale ? 'page' : undefined}>{code.toUpperCase()}</a>)}</div>
-        <a class="button button-small" href={langPaths.contact}>{text.quote}</a>
+      <a class="logo" href={langPaths.home} aria-label={`${site.name}, ${locales[locale].label}`}>
+        <img src="/assets/logo/logo.png" alt={site.name} width="220" height="127" />
+        <span class="logo-tagline">Transformando espacios en lugares únicos y personalizados.</span>
+      </a>
+      <nav id="main-nav" class="main-nav" aria-label="Navegación principal">
+        <div class="nav-links">
+          {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+        </div>
+        <div class="nav-actions">
+          <div class="header-socials" aria-label="Redes sociales">
+            {site.socials.map((social) => <a href={social.url} target="_blank" rel="noopener noreferrer" aria-label={social.name}><span class:list={["social-mark", `social-${social.name.toLowerCase()}`]} aria-hidden="true">{social.name === 'Facebook' ? 'f' : social.name === 'Instagram' ? '◎' : social.name === 'TikTok' ? '♪' : social.name === 'X' ? '𝕏' : 'P'}</span></a>)}
+          </div>
+          <a class="cart-link" href={langPaths.cart} aria-label={text.cart}>
+            <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M3 4h2l2.1 10.1a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 1.9-1.4L20.5 8H6"/><circle cx="9" cy="20" r="1.2"/><circle cx="18" cy="20" r="1.2"/></svg>
+            <span class="cart-label">{text.cart}</span><span class="cart-count" data-cart-count aria-live="polite">0</span>
+          </a>
+          <div class="language-switcher">
+            <button class="language-trigger" type="button" aria-expanded="false" aria-controls="language-menu">
+              <span>{locales[locale].label}</span><svg aria-hidden="true" viewBox="0 0 12 8" focusable="false"><path d="m1 1 5 5 5-5"/></svg>
+            </button>
+            <div id="language-menu" class="language-menu" hidden>
+              {Object.entries(locales).map(([code, item]) => <a class:list-active={code === locale} href={alternatePaths[code as Locale]} lang={item.lang} aria-current={code === locale ? 'page' : undefined}>{item.label}</a>)}
+            </div>
+          </div>
+        </div>
       </nav>
+      <a class="mobile-cart-link" href={langPaths.cart} aria-label={text.cart}>
+        <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false"><path d="M3 4h2l2.1 10.1a2 2 0 0 0 2 1.6h7.8a2 2 0 0 0 1.9-1.4L20.5 8H6"/><circle cx="9" cy="20" r="1.2"/><circle cx="18" cy="20" r="1.2"/></svg>
+        <span class="cart-count" data-cart-count aria-live="polite">0</span>
+      </a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-nav">
+        <span class="menu-icon" aria-hidden="true"><i></i><i></i><i></i></span><span class="sr-only">{text.menu}</span>
+      </button>
     </header>
     <main id="contenido"><slot /></main>
     <footer class="site-footer">
-      <div><p class="eyebrow">TADELAKT NATURAL</p><p>Revestimientos artesanales de cal y materiales naturales.</p></div>
+      <div><p class="eyebrow">TADELAKT NATURAL</p><p>Revestimientos artesanales de cal y materiales naturales.</p><div class="social-links" aria-label="Redes sociales">{site.socials.map((social) => <a href={social.url} target="_blank" rel="noopener noreferrer">{social.name}</a>)}</div></div>
       <div><p class="eyebrow">Contacto</p><a href={`mailto:${site.email}`}>{site.email}</a><span>{site.city}</span><a href={site.instagram} target="_blank" rel="noopener noreferrer">Instagram</a></div>
-      <div><p class="eyebrow">{text.explore}</p><a href={langPaths.services}>{text.services}</a><a href={langPaths.projects}>{text.projects}</a><a href={langPaths.contact}>{text.contact}</a><a href={langPaths.legal}>{text.legal}</a><a href={langPaths.privacy}>{text.privacy}</a><a href={langPaths.cookies}>{text.cookies}</a></div>
+      <div><p class="eyebrow">{text.explore}</p><a href={langPaths.services}>{text.services}</a><a href={langPaths.projects}>{text.projects}</a><a href={langPaths.shop}>{text.shop}</a><a href={langPaths.contact}>{text.contact}</a><a href={langPaths.legal}>{text.legal}</a><a href={langPaths.privacy}>{text.privacy}</a><a href={langPaths.cookies}>{text.cookies}</a></div>
       <small>© {new Date().getFullYear()} Tadelakt Natural</small>
     </footer>
     <script>
-      const button = document.querySelector('.menu-toggle');
-      const nav = document.querySelector('#main-nav');
-      button?.addEventListener('click', () => { const open = button.getAttribute('aria-expanded') === 'true'; button.setAttribute('aria-expanded', String(!open)); nav?.classList.toggle('is-open', !open); });
+      const menuButton = document.querySelector<HTMLButtonElement>('.menu-toggle');
+      const nav = document.querySelector<HTMLElement>('#main-nav');
+      const languageButton = document.querySelector<HTMLButtonElement>('.language-trigger');
+      const languageMenu = document.querySelector<HTMLElement>('#language-menu');
+      const setMenu = (open: boolean) => { menuButton?.setAttribute('aria-expanded', String(open)); nav?.classList.toggle('is-open', open); document.body.classList.toggle('nav-open', open); };
+      menuButton?.addEventListener('click', () => setMenu(menuButton.getAttribute('aria-expanded') !== 'true'));
+      languageButton?.addEventListener('click', () => { const open = languageButton.getAttribute('aria-expanded') === 'true'; languageButton.setAttribute('aria-expanded', String(!open)); if (languageMenu) languageMenu.hidden = open; });
+      document.addEventListener('click', (event) => { if (!(event.target instanceof Element)) return; if (!event.target.closest('.language-switcher')) { languageButton?.setAttribute('aria-expanded', 'false'); if (languageMenu) languageMenu.hidden = true; } });
+      document.addEventListener('keydown', (event) => { if (event.key === 'Escape') { setMenu(false); languageButton?.setAttribute('aria-expanded', 'false'); if (languageMenu) languageMenu.hidden = true; } });
+      nav?.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => setMenu(false)));
     </script>
+    <script src="/cart.js" defer></script>
   </body>
 </html>

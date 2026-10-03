@@ -27,6 +27,10 @@ Le fichier `public/_redirects` conserve les anciennes URL principales. `public/_
 
 Le formulaire de devis est volontairement honnête : il n’envoie pas encore de données. Connecter ultérieurement Cloudflare Pages Functions, Formspree ou un service équivalent après validation de la politique de confidentialité. Ne jamais placer de clé secrète dans le navigateur.
 
+## Boutique
+
+La boutique est disponible dans `/es/tienda/`, `/fr/boutique/` et `/en/shop/`. Le panier fonctionne côté navigateur avec `localStorage` et calcule les montants en centimes. Le paiement Stripe est désactivé et la livraison est affichée comme « calculée avant le paiement ». Les informations manquantes sont listées dans [PRODUCTS_TODO.md](./PRODUCTS_TODO.md).
+
 ## Contenu à confirmer
 
 Voir [CONTENT_TODO.md](./CONTENT_TODO.md) avant mise en production. Les informations manquantes n’ont pas été inventées.
